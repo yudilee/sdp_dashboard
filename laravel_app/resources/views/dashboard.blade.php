@@ -374,107 +374,54 @@
             </div>
         </div>
 
-        <!-- Stats Row -->
+        <!-- Stats Row (4 Columns) -->
         <div class="row g-3 mb-4">
-            <div class="col-md-4">
+            <div class="col-xl-3 col-md-6">
                 <a href="{{ route('details', ['category' => 'in_stock']) }}" class="text-decoration-none">
-                    <div class="stat-card bg-white p-3" style="border-left: 4px solid var(--success-color);">
+                    <div class="stat-card bg-white p-3 h-100" style="border-left: 4px solid var(--success-color);">
                         <div class="stat-label text-success">In Stock</div>
                         <div class="stat-value text-dark">{{ number_format($summary['in_stock']['total']) }}</div>
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-xl-3 col-md-6">
                 <a href="{{ route('details', ['category' => 'rented']) }}" class="text-decoration-none">
-                    <div class="stat-card bg-white p-3" style="border-left: 4px solid var(--warning-color);">
+                    <div class="stat-card bg-white p-3 h-100" style="border-left: 4px solid var(--warning-color);">
                         <div class="stat-label text-warning">Rented In Customer</div>
                         <div class="stat-value text-dark">{{ number_format($summary['rented_in_customer']['total']) }}</div>
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
-                <div class="stat-card bg-white p-3" style="border-left: 4px solid var(--danger-color);">
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card bg-white p-3 h-100" style="border-left: 4px solid var(--danger-color);">
                     <div class="stat-label text-danger">In Service</div>
                     <div class="stat-value text-dark">{{ number_format($summary['stock_external_service']['total'] + $summary['stock_internal_service']['total'] + ($summary['stock_insurance']['total'] ?? 0)) }}</div>
                     <small class="text-muted">Ext: {{ $summary['stock_external_service']['total'] }} | Int: {{ $summary['stock_internal_service']['total'] }} | Ins: {{ $summary['stock_insurance']['total'] ?? 0 }}</small>
                 </div>
             </div>
-        </div>
-
-        <!-- Rental Pairs & Pending Rentals Row -->
-        @if((isset($summary['rental_pairs_count']) && $summary['rental_pairs_count'] > 0) || (isset($summary['pending_rental']) && $summary['pending_rental'] > 0) || (isset($reserveRentalData) && $reserveRentalData['count'] > 0))
-        <div class="row g-3 mb-4">
-            @if(isset($summary['rental_pairs_count']) && $summary['rental_pairs_count'] > 0)
-            <div class="col-md-6">
+            <div class="col-xl-3 col-md-6">
+                @if(isset($summary['rental_pairs_count']) && $summary['rental_pairs_count'] > 0)
                 <a href="{{ route('rental.pairs') }}" class="text-decoration-none">
-                    <div class="stat-card p-3" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid var(--warning-color);">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle bg-white bg-opacity-50 p-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="bi bi-arrow-left-right fs-4 text-warning" style="color: var(--rented-color) !important;"></i>
-                                </div>
-                                <div>
-                                    <div class="stat-label" style="color: var(--rented-color);">Main & Replacement Pairs</div>
-                                    <div class="d-flex align-items-baseline gap-2">
-                                        <div class="stat-value text-dark">{{ $summary['rental_pairs_count'] }}</div>
-                                        <div class="text-muted small">active pairs</div>
-                                    </div>
-                                </div>
+                    <div class="stat-card bg-white p-3 h-100" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid var(--warning-color);">
+                        <div class="d-flex justify-content-between align-items-center h-100">
+                            <div>
+                                <div class="stat-label" style="color: var(--rented-color);">Rental Pairs</div>
+                                <div class="stat-value text-dark">{{ $summary['rental_pairs_count'] }}</div>
+                                <div class="text-muted small">active pairs</div>
                             </div>
-                            <i class="bi bi-chevron-right fs-5 text-muted opacity-50"></i>
+                            <i class="bi bi-arrow-left-right fs-4 text-warning" style="color: var(--rented-color) !important;"></i>
                         </div>
                     </div>
                 </a>
+                @else
+                <div class="stat-card bg-white p-3 h-100" style="background: var(--bg-light); border-left: 4px solid var(--text-muted);">
+                    <div class="stat-label text-muted">Rental Pairs</div>
+                    <div class="stat-value text-muted">-</div>
+                    <div class="text-muted small">No active pairs</div>
+                </div>
+                @endif
             </div>
-            @endif
-
-            @if(isset($summary['pending_rental']) && $summary['pending_rental'] > 0)
-            <div class="col-md-6">
-                <a href="{{ route('details', ['category' => 'reserve_rental']) }}" class="text-decoration-none">
-                    <div class="stat-card p-3" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border-left: 4px solid var(--reserve-color);">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle bg-white bg-opacity-50 p-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="bi bi-calendar-event fs-4" style="color: var(--reserve-color);"></i>
-                                </div>
-                                <div>
-                                    <div class="stat-label" style="color: var(--reserve-color);">Pending Rental</div>
-                                    <div class="d-flex align-items-baseline gap-2">
-                                        <div class="stat-value text-dark">{{ $summary['pending_rental'] }}</div>
-                                        <div class="text-muted small">future rentals</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <i class="bi bi-chevron-right fs-5 text-muted opacity-50"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            @elseif(isset($reserveRentalData) && $reserveRentalData['count'] > 0)
-             <div class="col-md-6">
-                <a href="{{ route('details', ['category' => 'reserve_rental']) }}" class="text-decoration-none">
-                    <div class="stat-card p-3" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border-left: 4px solid var(--reserve-color);">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle bg-white bg-opacity-50 p-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="bi bi-calendar-event fs-4" style="color: var(--reserve-color);"></i>
-                                </div>
-                                <div>
-                                    <div class="stat-label" style="color: var(--reserve-color);">Reserve Rental</div>
-                                    <div class="d-flex align-items-baseline gap-2">
-                                        <div class="stat-value text-dark">{{ $reserveRentalData['count'] }}</div>
-                                        <div class="text-muted small">future rentals</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <i class="bi bi-chevron-right fs-5 text-muted opacity-50"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            @endif
         </div>
-        @endif
 
         <!-- Historical Trends -->
         @if(count($history) > 1)
@@ -484,71 +431,106 @@
         </div>
         @endif
 
-        <!-- Chart & Ownership Row -->
+        <!-- Chart & Sidebar Grid Row -->
         <div class="row g-3 mb-4">
+            <!-- Left: Pie Chart -->
             <div class="col-lg-7">
                 <div class="chart-card p-3 h-100">
                     <div class="section-header"><i class="bi bi-pie-chart me-2"></i>Stock Distribution (Click to drill down)</div>
                     <div id="drilldownChart" style="height: 320px;"></div>
                 </div>
             </div>
+            
+            <!-- Right: Sidebar Grids -->
             <div class="col-lg-5">
                 <div class="chart-card p-3 h-100">
+                    <!-- Ownership Grid -->
                     <div class="section-header"><i class="bi bi-building me-2"></i>Ownership</div>
                     <div class="row g-2 mb-3">
                         <div class="col-6">
-                            <div class="text-center p-3 rounded" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+                            <div class="text-center p-3 rounded h-100 d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
                                 <div class="stat-value text-indigo">{{ number_format($summary['sdp_stock'] - $summary['vendor_rent']) }}</div>
                                 <div class="small text-muted">SDP Owned</div>
                             </div>
                         </div>
                         <div class="col-6">
                             <a href="{{ route('details', ['category' => 'vendor_rent']) }}" class="text-decoration-none">
-                                <div class="text-center p-3 rounded" style="background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);">
+                                <div class="text-center p-3 rounded h-100 d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);">
                                     <div class="stat-value text-info">{{ number_format($summary['vendor_rent']) }}</div>
                                     <div class="small text-muted">Vendor Rent</div>
                                 </div>
                             </a>
                         </div>
                     </div>
+                    
                     @if(($summary['uncategorized']['total'] ?? 0) > 0)
                     <a href="{{ route('details', ['category' => 'uncategorized']) }}" class="btn btn-danger btn-sm w-100 mb-3">
                         <i class="bi bi-exclamation-triangle me-1"></i> {{ $summary['uncategorized']['total'] }} Uncategorized
                     </a>
                     @endif
-                    <div class="section-header mt-2"><i class="bi bi-calendar-check me-2"></i>Rental Type</div>
+
+                    <!-- Rental Types 2x2 Grid -->
+                    <div class="section-header mt-4"><i class="bi bi-calendar-check me-2"></i>Rental Type</div>
                     <div class="row g-2">
+                        <!-- Row 1 -->
                         <div class="col-6">
                             <a href="{{ route('details', ['category' => 'rental_type', 'sub' => 'Subscription']) }}" class="text-decoration-none">
-                                <div class="text-center p-2 rounded" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
-                                    <div class="stat-value text-primary" style="font-size: 1.3rem;">{{ number_format($summary['rental_type_summary']['Subscription'] ?? 0) }}</div>
-                                    <div class="small text-muted">Subscription</div>
-                                    @if(isset($summary['unique_rental_contracts']['Subscription']))
-                                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">
-                                        <i class="bi bi-file-text"></i> {{ number_format($summary['unique_rental_contracts']['Subscription']) }} contracts
-                                    </div>
-                                    @endif
+                                <div class="stat-card p-3 h-100" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+                                    <div class="text-primary fw-bold mb-1">SUBSCRIPTION</div>
+                                    <div class="h4 mb-0 text-dark">{{ number_format($summary['rental_type_summary']['Subscription'] ?? 0) }}</div>
+                                    <div class="small text-muted">{{ number_format($summary['unique_rental_contracts']['Subscription'] ?? 0) }} contracts</div>
                                 </div>
                             </a>
                         </div>
                         <div class="col-6">
                             <a href="{{ route('details', ['category' => 'rental_type', 'sub' => 'Regular']) }}" class="text-decoration-none">
-                                <div class="text-center p-2 rounded" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
-                                    <div class="stat-value text-warning" style="font-size: 1.3rem;">{{ number_format($summary['rental_type_summary']['Regular'] ?? 0) }}</div>
-                                    <div class="small text-muted">Regular</div>
-                                    @if(isset($summary['unique_rental_contracts']['Regular']))
-                                    <div class="text-muted" style="font-size: 0.65rem; margin-top: 2px;">
-                                        <i class="bi bi-file-text"></i> {{ number_format($summary['unique_rental_contracts']['Regular']) }} contracts
-                                    </div>
-                                    @endif
+                                <div class="stat-card p-3 h-100" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                                    <div class="text-warning fw-bold mb-1">REGULAR</div>
+                                    <div class="h4 mb-0 text-dark">{{ number_format($summary['rental_type_summary']['Regular'] ?? 0) }}</div>
+                                    <div class="small text-muted">{{ number_format($summary['unique_rental_contracts']['Regular'] ?? 0) }} contracts</div>
                                 </div>
                             </a>
+                        </div>
+                        
+                        <!-- Row 2 -->
+                        <div class="col-6">
+                            @if(isset($summary['reserved_subscription']) && $summary['reserved_subscription'] > 0)
+                            <a href="{{ route('details', ['category' => 'reserved_subscription']) }}" class="text-decoration-none">
+                                <div class="stat-card p-3 h-100" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px dashed var(--primary-color);">
+                                    <div class="text-primary fw-bold mb-1">RESERVED</div>
+                                    <div class="h4 mb-0 text-dark">{{ number_format($summary['reserved_subscription']) }}</div>
+                                    <div class="small text-muted">Future</div>
+                                </div>
+                            </a>
+                            @else
+                            <div class="stat-card p-3 h-100 opacity-50" style="background: var(--bg-light);">
+                                <div class="text-muted fw-bold mb-1">RESERVED</div>
+                                <div class="h4 mb-0">-</div>
+                            </div>
+                            @endif
+                        </div>
+                        <div class="col-6">
+                            @if(isset($summary['inactive_subscription']) && $summary['inactive_subscription'] > 0)
+                            <a href="{{ route('details', ['category' => 'inactive_subscription']) }}" class="text-decoration-none">
+                                <div class="stat-card p-3 h-100" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);">
+                                    <div class="text-danger fw-bold mb-1">EXPIRED</div>
+                                    <div class="h4 mb-0 text-dark">{{ number_format($summary['inactive_subscription']) }}</div>
+                                    <div class="small text-muted">Past</div>
+                                </div>
+                            </a>
+                            @else
+                            <div class="stat-card p-3 h-100 opacity-50" style="background: var(--bg-light);">
+                                <div class="text-muted fw-bold mb-1">EXPIRED</div>
+                                <div class="h4 mb-0">-</div>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
+        
+        
         <!-- Breakdowns -->
         <div class="row g-3">
             <!-- In Stock -->

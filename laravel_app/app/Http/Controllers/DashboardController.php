@@ -407,11 +407,43 @@ class DashboardController extends Controller
                  return stripos($item['location'], 'Partners/Vendors/Insurance') === 0;
             }
             if ($category == 'rental_type') {
+                // Only show active rentals (within date range)
+                $isActive = $item['is_active_rental'] ?? true;
+                if (!$isActive) return false;
+                
                 $rentalType = $item['rental_type'] ?? '';
                 if ($sub) {
                     return $rentalType === $sub;
                 }
                 return !empty($rentalType);
+            }
+            if ($category == 'reserved_subscription') {
+                // Future subscriptions (start > today)
+                $rentalType = $item['rental_type'] ?? '';
+                if ($rentalType !== 'Subscription') return false;
+                
+                $startDate = $item['actual_start_rental'] ?? null;
+                if (empty($startDate) || !is_numeric($startDate)) return false;
+                
+                $excelBase = new \DateTime('1899-12-30');
+                $today = new \DateTime('today');
+                $todaySerial = $excelBase->diff($today)->days;
+                
+                return $startDate > $todaySerial;
+            }
+            if ($category == 'inactive_subscription') {
+                // Expired subscriptions (end < today)
+                $rentalType = $item['rental_type'] ?? '';
+                if ($rentalType !== 'Subscription') return false;
+                
+                $endDate = $item['actual_end_rental'] ?? null;
+                if (empty($endDate) || !is_numeric($endDate)) return false;
+                
+                $excelBase = new \DateTime('1899-12-30');
+                $today = new \DateTime('today');
+                $todaySerial = $excelBase->diff($today)->days;
+                
+                return $endDate < $todaySerial;
             }
             
             return true;

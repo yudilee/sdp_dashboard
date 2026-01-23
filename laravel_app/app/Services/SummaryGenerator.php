@@ -45,6 +45,8 @@ class SummaryGenerator
                 'Subscription' => 0,
                 'Regular' => 0,
             ],
+            'inactive_subscription' => 0, // Expired subscriptions (end < today)
+            'reserved_subscription' => 0, // Future subscriptions (start > today)
             'in_stock' => [
                 'total' => 0,
                 'details' => [
@@ -165,13 +167,22 @@ class SummaryGenerator
             $actualEndRental = $row[$idxParams['actual_end_rental']] ?? null;
             $rentalId = trim($row[$idxParams['rental_id']] ?? '');
 
-            // Rental Status Check
+            // Rental Status Check - Active if today is between start and end dates
             $isActiveRental = true;
+            
+            // Check if rental has started
             if (is_numeric($actualStartRental) && $actualStartRental > $todaySerial) {
                 // If start date is in the future, it is PENDING
                 $isActiveRental = false;
             }
-            // Note: If actualStartRental is empty/null, we assume Active (existing behavior)
+            
+            // Check if rental has ended
+            if (is_numeric($actualEndRental) && $actualEndRental < $todaySerial) {
+                // If end date is in the past, it is EXPIRED
+                $isActiveRental = false;
+            }
+            
+            // Note: If dates are empty/null, we assume Active (existing behavior)
 
             // Check for SOLD
             // User clarified: "SDP/STOCK SOLD" (26 items) is valid stock.
@@ -186,8 +197,8 @@ class SummaryGenerator
                 // SDP Stock Accumulator (Total Active Stock)
                 $summary['sdp_stock'] += $qty;
                 
-                // Active Rental Logic
-                if (!$isActiveRental) {
+                // Reserved Rental Logic (Future Start Date Only)
+                if (is_numeric($actualStartRental) && $actualStartRental > $todaySerial) {
                     $summary['pending_rental'] += $qty;
                 }
                 
@@ -196,19 +207,32 @@ class SummaryGenerator
                     $summary['vendor_rent'] += $qty;
                 }
                 
-                // Rental Type Count (Subscription/Regular) - Count for ALL active fleet (excluding Sold)
-                // MODIFIED: Include Pending in Total Count (User preference: 2992)
-                if ($rentalType === 'Subscription') {
-                    $summary['rental_type_summary']['Subscription'] += $qty;
-                    // Track unique rental contracts (not double-counting replacements)
-                    if (!empty($rentalId) && !isset($uniqueSubscriptionRentals[$rentalId])) {
-                        $uniqueSubscriptionRentals[$rentalId] = true;
+                // Rental Type Count (Subscription/Regular) - Only count ACTIVE rentals
+                // MODIFIED: Exclude expired rentals (end < today) and pending (start > today)
+                if ($isActiveRental) {
+                    if ($rentalType === 'Subscription') {
+                        $summary['rental_type_summary']['Subscription'] += $qty;
+                        // Track unique rental contracts (not double-counting replacements)
+                        if (!empty($rentalId) && !isset($uniqueSubscriptionRentals[$rentalId])) {
+                            $uniqueSubscriptionRentals[$rentalId] = true;
+                        }
+                    } elseif ($rentalType === 'Regular') {
+                        $summary['rental_type_summary']['Regular'] += $qty;
+                        // Track unique rental contracts
+                        if (!empty($rentalId) && !isset($uniqueRegularRentals[$rentalId])) {
+                            $uniqueRegularRentals[$rentalId] = true;
+                        }
                     }
-                } elseif ($rentalType === 'Regular') {
-                    $summary['rental_type_summary']['Regular'] += $qty;
-                    // Track unique rental contracts
-                    if (!empty($rentalId) && !isset($uniqueRegularRentals[$rentalId])) {
-                        $uniqueRegularRentals[$rentalId] = true;
+                } else {
+                    // Track INACTIVE (Expired) and RESERVED (Future) Subscriptions
+                    if ($rentalType === 'Subscription') {
+                        if (is_numeric($actualEndRental) && $actualEndRental < $todaySerial) {
+                            // Expired: end date is in the past
+                            $summary['inactive_subscription'] += $qty;
+                        } elseif (is_numeric($actualStartRental) && $actualStartRental > $todaySerial) {
+                            // Reserved: start date is in the future
+                            $summary['reserved_subscription'] += $qty;
+                        }
                     }
                 }
             }
