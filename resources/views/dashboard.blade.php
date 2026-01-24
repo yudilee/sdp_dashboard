@@ -478,7 +478,7 @@
                                 <div class="stat-card p-3 h-100" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
                                     <div class="text-primary fw-bold mb-1">SUBSCRIPTION</div>
                                     <div class="h4 mb-0 text-dark">{{ number_format($summary['rental_type_summary']['Subscription'] ?? 0) }}</div>
-                                    <div class="small text-muted">{{ number_format($summary['unique_rental_contracts']['Subscription'] ?? 0) }} contracts</div>
+
                                 </div>
                             </a>
                         </div>
@@ -487,7 +487,7 @@
                                 <div class="stat-card p-3 h-100" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
                                     <div class="text-warning fw-bold mb-1">REGULAR</div>
                                     <div class="h4 mb-0 text-dark">{{ number_format($summary['rental_type_summary']['Regular'] ?? 0) }}</div>
-                                    <div class="small text-muted">{{ number_format($summary['unique_rental_contracts']['Regular'] ?? 0) }} contracts</div>
+
                                 </div>
                             </a>
                         </div>
