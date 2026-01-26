@@ -805,6 +805,20 @@
 
         const chart = new ApexCharts(document.getElementById('drilldownChart'), chartOptions);
         chart.render();
+        
+        // Import Loading Handling
+        const uploadForm = document.querySelector('#uploadModal form');
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function() {
+                // Hide modal
+                const modalEl = document.getElementById('uploadModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                
+                // Show loading overlay
+                document.getElementById('loadingOverlay').classList.remove('d-none');
+            });
+        }
 
         document.getElementById('drilldownChart').addEventListener('dblclick', () => {
             if (isDrilled) {
@@ -870,5 +884,11 @@
             });
         });
     </script>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="d-none position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="background: rgba(255,255,255,0.9); z-index: 9999;">
+        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+        <h5 class="fw-bold text-primary">Processing Data...</h5>
+        <div class="text-muted small">This may take a few moments</div>
+    </div>
 </body>
 </html>
