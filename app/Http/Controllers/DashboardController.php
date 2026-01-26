@@ -159,6 +159,14 @@ class DashboardController extends Controller
                $rentalId = $item['rental_id'] ?? '';
                $startDate = $item['actual_start_rental'] ?? null;
                if (empty($rentalId) || empty($startDate)) return false;
+               
+               // Sub-filter
+               if ($sub) {
+                   $count = $item['rental_id_count'] ?? 0;
+                   if ($sub == 'with_replace' && $count <= 1) return false;
+                   if ($sub == 'no_replace' && $count > 1) return false; 
+               }
+               
                $excelBase = new \DateTime('1899-12-30');
                $today = new \DateTime('today');
                $todaySerial = $excelBase->diff($today)->days;

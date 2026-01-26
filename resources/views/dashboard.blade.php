@@ -343,6 +343,8 @@
         </div>
         @endif
 
+
+
         @if(isset($summary))
         <!-- Search Bar -->
         <div class="mb-4">
@@ -477,7 +479,7 @@
                             <a href="{{ route('details', ['category' => 'rental_type', 'sub' => 'Subscription']) }}" class="text-decoration-none">
                                 <div class="stat-card p-3 h-100" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
                                     <div class="text-primary fw-bold mb-1">SUBSCRIPTION</div>
-                                    <div class="h4 mb-0 text-dark">{{ number_format($summary['rental_type_summary']['Subscription'] ?? 0) }}</div>
+                                    <div class="h4 mb-0 text-dark">{{ number_format($summary['unique_rental_contracts']['Subscription'] ?? 0) }}</div>
 
                                 </div>
                             </a>
@@ -486,7 +488,7 @@
                             <a href="{{ route('details', ['category' => 'rental_type', 'sub' => 'Regular']) }}" class="text-decoration-none">
                                 <div class="stat-card p-3 h-100" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
                                     <div class="text-warning fw-bold mb-1">REGULAR</div>
-                                    <div class="h4 mb-0 text-dark">{{ number_format($summary['rental_type_summary']['Regular'] ?? 0) }}</div>
+                                    <div class="h4 mb-0 text-dark">{{ number_format($summary['unique_rental_contracts']['Regular'] ?? 0) }}</div>
 
                                 </div>
                             </a>
@@ -539,25 +541,31 @@
                     <a href="{{ route('details', ['category' => 'in_stock']) }}" class="section-header text-success text-decoration-none d-block"><i class="bi bi-box-seam me-2"></i>In Stock <small class="text-muted">({{ $summary['in_stock']['total'] }})</small></a>
                     
                     <!-- Stock by Rental Status - Mini Stats -->
-                    @if(isset($stockByRentalStatus))
+                    @if(isset($summary['in_stock']['rental_status']))
                     <div class="breakdown-divider">By Rental Status</div>
                     <div class="row g-2 mb-3">
-                        <div class="col-4">
-                            <a href="{{ route('details', ['category' => 'stock_pure']) }}" class="mini-stat mini-stat-stock" data-tooltip="Available for rent">
-                                <div class="value">{{ $stockByRentalStatus['pure_stock'] ?? 0 }}</div>
+                        <div class="col-6">
+                            <div class="mini-stat mini-stat-stock" data-tooltip="Available for rent">
+                                <div class="value">{{ $summary['in_stock']['rental_status']['pure_stock'] ?? 0 }}</div>
                                 <div class="label">Pure Stock</div>
-                            </a>
+                            </div>
                         </div>
-                        <div class="col-4">
-                            <a href="{{ route('details', ['category' => 'stock_original']) }}" class="mini-stat mini-stat-original" data-tooltip="Original In Stock">
-                                <div class="value">{{ $stockByRentalStatus['original'] ?? 0 }}</div>
-                                <div class="label">Original</div>
-                            </a>
-                        </div>
-                        <div class="col-4">
-                            <a href="{{ route('details', ['category' => 'stock_reserve']) }}" class="mini-stat mini-stat-reserve" data-tooltip="Reserve for Future Rental">
-                                <div class="value">{{ $stockByRentalStatus['reserve'] ?? 0 }}</div>
+                        <div class="col-6">
+                            <div class="mini-stat mini-stat-reserve" data-tooltip="Reserve for Future Rental">
+                                <div class="value">{{ $summary['in_stock']['rental_status']['reserve'] ?? 0 }}</div>
                                 <div class="label">Reserve</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ route('details', ['category' => 'stock_original', 'sub' => 'with_replace']) }}" class="mini-stat" style="background: #eff6ff; color: #3b82f6; border: 1px solid #dbeafe;" data-tooltip="Original In Stock (With Replacement)">
+                                <div class="value">{{ $summary['in_stock']['rental_status']['original_with_replace'] ?? 0 }}</div>
+                                <div class="label">Orig (With Repl)</div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ route('details', ['category' => 'stock_original', 'sub' => 'no_replace']) }}" class="mini-stat" style="background: #fff1f2; color: #e11d48; border: 1px solid #ffe4e6;" data-tooltip="Original In Stock (No Replacement)">
+                                <div class="value">{{ $summary['in_stock']['rental_status']['original_without_replace'] ?? 0 }}</div>
+                                <div class="label">Orig (No Repl)</div>
                             </a>
                         </div>
                     </div>

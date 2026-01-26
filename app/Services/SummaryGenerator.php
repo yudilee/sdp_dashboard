@@ -49,6 +49,12 @@ class SummaryGenerator
             'reserved_subscription' => 0, // Future subscriptions (start > today)
             'in_stock' => [
                 'total' => 0,
+                'rental_status' => [
+                    'pure_stock' => 0,
+                    'original_with_replace' => 0,
+                    'original_without_replace' => 0,
+                    'reserve' => 0, // Maps to active future rentals or specific status
+                ],
                 'details' => [
                     'SDP/OPERATION' => ['count' => 0, 'qty' => 0],
                     'SDP/STOCK SOLD' => [
@@ -152,6 +158,8 @@ class SummaryGenerator
         // Track unique rental IDs for contract counting
         $uniqueSubscriptionRentals = [];
         $uniqueRegularRentals = [];
+        $nonIdSubscriptionItems = 0;
+        $nonIdRegularItems = 0;
 
         $items = [];
         foreach ($data as $i => $row) {
@@ -213,14 +221,22 @@ class SummaryGenerator
                     if ($rentalType === 'Subscription') {
                         $summary['rental_type_summary']['Subscription'] += $qty;
                         // Track unique rental contracts (not double-counting replacements)
-                        if (!empty($rentalId) && !isset($uniqueSubscriptionRentals[$rentalId])) {
-                            $uniqueSubscriptionRentals[$rentalId] = true;
+                        if (!empty($rentalId)) {
+                            if (!isset($uniqueSubscriptionRentals[$rentalId])) {
+                                $uniqueSubscriptionRentals[$rentalId] = true;
+                            }
+                        } else {
+                            $nonIdSubscriptionItems += $qty;
                         }
                     } elseif ($rentalType === 'Regular') {
                         $summary['rental_type_summary']['Regular'] += $qty;
                         // Track unique rental contracts
-                        if (!empty($rentalId) && !isset($uniqueRegularRentals[$rentalId])) {
-                            $uniqueRegularRentals[$rentalId] = true;
+                        if (!empty($rentalId)) {
+                            if (!isset($uniqueRegularRentals[$rentalId])) {
+                                $uniqueRegularRentals[$rentalId] = true;
+                            }
+                        } else {
+                            $nonIdRegularItems += $qty;
                         }
                     }
                 } else {
@@ -241,27 +257,45 @@ class SummaryGenerator
             if (!$isSold && $inStock) {
                 $summary['in_stock']['total'] += $qty;
                 
-                // Categorize Location
-                // "SDP/OPERATION" -> Logic?
-                // "SDP/STOCK SOLD" -> Logic?
+                // --- RENTAL STATUS BREAKDOWN ---
+                // Helper vars
+                $sRentalId = $rentalId;
+                $sLotNo = $lotNo;
+                $sReservedLot = $reservedLot;
+                $sIsOriginal = (!empty($sRentalId) && $sLotNo == $sReservedLot);
+                $sRentalCount = $rentalIdCounts[$sRentalId] ?? 0;
                 
-                // Inferring from location names:
-                // If Location contains "Operation", classify as "SDP/OPERATION" -> "Operation"?
-                // Else "SDP/STOCK SOLD"
+                // Check Reserve (Future Start)
+                // We use is_numeric check same as above
+                $isFuture = (is_numeric($actualStartRental) && $actualStartRental > $todaySerial);
                 
-                if (stripos($location, 'Operation') !== false) {
-                     $summary['in_stock']['details']['SDP/OPERATION']['count'] += $qty; // Or just add to 'Operation' key if I simplify structure
-                     // Wait, structure in Excel:
-                     // SDP/OPERATION | Operation | 7
-                     // SDP/STOCK SOLD | Stock for Sold | 26
-                     //                 | Jakarta | ...
-                     
-                     // I will put it in a flat list or nested? Nested is better for display.
+                if ($isFuture) {
+                    $summary['in_stock']['rental_status']['reserve'] += $qty;
+                } elseif ($isActiveRental && !empty($sRentalId)) {
+                    // Active Rental in Stock
+                    if ($sIsOriginal) {
+                        if ($sRentalCount > 1) {
+                            $summary['in_stock']['rental_status']['original_with_replace'] += $qty;
+                        } else {
+                            $summary['in_stock']['rental_status']['original_without_replace'] += $qty;
+                        }
+                    } else {
+                        // Active Rental but IS Replacement in stock?
+                        // Treat as Pure Stock for now or track separately if needed.
+                        // For the user request "Original in stock breakdown", we focus on originals.
+                        // If we add to pure_stock efficiently:
+                        $summary['in_stock']['rental_status']['pure_stock'] += $qty; 
+                    }
                 } else {
-                     // Use actual location as key for display
-                     $loc = $location; // Keep original case for display
-                     
-                     // Initialize if not exists
+                    // No Active Rental ID (Pure Stock or Expired)
+                    $summary['in_stock']['rental_status']['pure_stock'] += $qty;
+                }
+                
+                // Categorize Location
+                if (stripos($location, 'Operation') !== false) {
+                     $summary['in_stock']['details']['SDP/OPERATION']['count'] += $qty; 
+                } else {
+                     $loc = $location; 
                      if (!isset($summary['in_stock']['details']['locations'])) {
                          $summary['in_stock']['details']['locations'] = [];
                      }
@@ -428,8 +462,8 @@ class SummaryGenerator
         $summary['rental_pairs_count'] = $rentalPairsCount;
         
         // Populate unique rental contract counts
-        $summary['unique_rental_contracts']['Subscription'] = count($uniqueSubscriptionRentals);
-        $summary['unique_rental_contracts']['Regular'] = count($uniqueRegularRentals);
+        $summary['unique_rental_contracts']['Subscription'] = count($uniqueSubscriptionRentals) + $nonIdSubscriptionItems;
+        $summary['unique_rental_contracts']['Regular'] = count($uniqueRegularRentals) + $nonIdRegularItems;
         
         return ['summary' => $summary, 'items' => $items];
     }
