@@ -71,6 +71,11 @@ class DashboardController extends Controller
         return view('dashboard', compact('summary', 'metadata', 'history', 'reserveRentalData', 'stockByRentalStatus'));
     }
     
+    public function summary()
+    {
+        return view('summary');
+    }
+    
     public function upload(Request $request, SummaryGenerator $generator)
     {
         $request->validate([
