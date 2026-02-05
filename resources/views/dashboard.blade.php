@@ -166,10 +166,12 @@
 
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 animate-enter delay-200">
+    <!-- Main Content Breakdown (Row 1) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 animate-enter delay-200">
         
         <!-- Left Column: Breakdowns -->
-        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <!-- Left Column: In Stock Breakdown -->
+        <div>
             
             <!-- In Stock Breakdown -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 p-6">
@@ -235,8 +237,23 @@
                 </div>
             </div>
 
-            <!-- Right Side Stack -->
-            <div class="space-y-8">
+        </div>
+
+        <!-- Right Column: Active & Service Stack -->
+        <div class="space-y-8">
+            
+            <!-- Attention Needed (Moved to Top of Stack) -->
+            @if(($summary['uncategorized']['total'] ?? 0) > 0)
+            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6">
+                 <div class="flex items-center gap-2 mb-4">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <h3 class="font-bold text-slate-800 dark:text-slate-100">Attention Needed</h3>
+                </div>
+                <a href="{{ route('details', ['category' => 'uncategorized']) }}" class="flex items-center justify-center gap-2 w-full py-3 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors border border-red-100">
+                    {{ $summary['uncategorized']['total'] }} Uncategorized Items
+                </a>
+            </div>
+            @endif
             
             <!-- Active Rental Detail -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6">
@@ -405,39 +422,24 @@
                 </div>
             </div>
 
-            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row (Row 2) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 animate-enter delay-300">
+        <!-- Stock Distribution Chart -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 h-auto">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-4">Stock Distribution</h3>
+            <div id="drilldownChart" class="h-64"></div>
         </div>
 
-        <!-- Right Column: Ownership & Charts -->
-        <div class="space-y-8">
-            
-            <!-- Attention Needed (Uncategorized) -->
-            @if(($summary['uncategorized']['total'] ?? 0) > 0)
-            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6">
-                 <div class="flex items-center gap-2 mb-4">
-                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    <h3 class="font-bold text-slate-800 dark:text-slate-100">Attention Needed</h3>
-                </div>
-                <a href="{{ route('details', ['category' => 'uncategorized']) }}" class="flex items-center justify-center gap-2 w-full py-3 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors border border-red-100">
-                    {{ $summary['uncategorized']['total'] }} Uncategorized Items
-                </a>
+        <!-- Active Rental Chart -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 h-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-800 dark:text-slate-100">Active Rental Distribution</h3>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Total: {{ number_format($activeRentalData['total'] ?? 0) }}</span>
             </div>
-            @endif
-
-            <!-- Stock Distribution Chart -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 h-auto">
-                <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-4">Stock Distribution</h3>
-                <div id="drilldownChart" class="h-64"></div>
-            </div>
-
-            <!-- Active Rental Chart -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 h-auto">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-800 dark:text-slate-100">Active Rental Distribution</h3>
-                    <span class="text-xs text-slate-500 dark:text-slate-400">Total: {{ number_format($activeRentalData['total'] ?? 0) }}</span>
-                </div>
-                <div id="activeRentalChart" class="h-64"></div>
-            </div>
+            <div id="activeRentalChart" class="h-64"></div>
         </div>
     </div>
 
