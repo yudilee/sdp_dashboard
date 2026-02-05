@@ -46,10 +46,10 @@
     </div>
 
     <!-- Hero Card - Total Active Stock -->
-    <a href="{{ route('total.stock') }}" class="block relative overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 rounded-2xl p-6 mb-8 text-white shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer group">
+    <div class="block relative overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 rounded-2xl p-6 mb-8 text-white shadow-xl">
         <!-- Decorative Elements -->
-        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl"></div>
-        <div class="absolute bottom-0 left-1/3 -mb-20 w-48 h-48 rounded-full bg-cyan-400 opacity-10 blur-2xl"></div>
+        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-5 blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 left-1/3 -mb-20 w-48 h-48 rounded-full bg-cyan-400 opacity-10 blur-2xl pointer-events-none"></div>
         
         <div class="relative">
             <!-- Header Row -->
@@ -71,31 +71,31 @@
             <!-- Stats Row - Spread across with dividers -->
             <div class="flex items-center justify-between">
                 <!-- Total Count - Left -->
-                <div class="flex-1">
-                    <p class="text-5xl font-black tracking-tight text-white">{{ number_format($summary['sdp_stock']) }}</p>
+                <a href="{{ route('total.stock') }}" class="flex-1 group hover:scale-105 transition-transform cursor-pointer">
+                    <p class="text-5xl font-black tracking-tight text-white group-hover:text-indigo-100 transition-colors">{{ number_format($summary['sdp_stock']) }}</p>
                     <p class="text-indigo-200 text-sm font-medium mt-1">Active Inventory Units</p>
-                </div>
+                </a>
 
                 <!-- Divider -->
                 <div class="hidden sm:block w-px h-16 bg-white/20 mx-6"></div>
 
                 <!-- SDP Owned - Center -->
-                <div onclick="window.location='{{ route('details', ['category' => 'sdp_owned']) }}'; event.stopPropagation();" class="flex-1 text-center cursor-pointer hover:scale-105 transition-transform">
-                    <p class="text-3xl font-bold text-white">{{ number_format($summary['sdp_stock'] - $summary['vendor_rent']) }}</p>
+                <a href="{{ route('details', ['category' => 'sdp_owned']) }}" class="flex-1 text-center group hover:scale-105 transition-transform cursor-pointer">
+                    <p class="text-3xl font-bold text-white group-hover:text-indigo-100 transition-colors">{{ number_format($summary['sdp_stock'] - $summary['vendor_rent']) }}</p>
                     <p class="text-indigo-200 text-xs font-semibold uppercase tracking-wider mt-1">SDP Owned</p>
-                </div>
+                </a>
 
                 <!-- Divider -->
                 <div class="hidden sm:block w-px h-16 bg-white/20 mx-6"></div>
 
                 <!-- Vendor Rent - Right -->
-                <div onclick="window.location='{{ route('details', ['category' => 'vendor_rent']) }}'; event.stopPropagation();" class="flex-1 text-right cursor-pointer hover:scale-105 transition-transform">
-                    <p class="text-3xl font-bold text-cyan-300">{{ number_format($summary['vendor_rent']) }}</p>
+                <a href="{{ route('details', ['category' => 'vendor_rent']) }}" class="flex-1 text-right group hover:scale-105 transition-transform cursor-pointer">
+                    <p class="text-3xl font-bold text-cyan-300 group-hover:text-cyan-200 transition-colors">{{ number_format($summary['vendor_rent']) }}</p>
                     <p class="text-indigo-200 text-xs font-semibold uppercase tracking-wider mt-1">Vendor Rent</p>
-                </div>
+                </a>
             </div>
         </div>
-    </a>
+    </div>
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 animate-enter delay-100">
