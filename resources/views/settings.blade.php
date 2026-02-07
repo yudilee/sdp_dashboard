@@ -164,59 +164,7 @@
             </form>
         </div>
 
-        <!-- Odoo Connection Settings -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-            <div class="p-6 border-b border-slate-100 dark:border-slate-800">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Odoo Connection</h2>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">Configure Odoo API connection settings</p>
-                    </div>
-                </div>
-            </div>
-            
-            <form action="{{ route('settings.odoo') }}" method="POST" class="p-6">
-                @csrf
-                
-                <div class="space-y-4 mb-6">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Odoo URL</label>
-                        <input type="url" name="odoo_url" value="{{ $odoo['url'] }}" placeholder="https://your-odoo.com"
-                            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Database</label>
-                            <input type="text" name="odoo_db" value="{{ $odoo['db'] }}" placeholder="database_name"
-                                class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Username</label>
-                            <input type="text" name="odoo_user" value="{{ $odoo['user'] }}" placeholder="admin@example.com"
-                                class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">API Key / Password</label>
-                        <input type="password" name="odoo_password" placeholder="Enter new password to update"
-                            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">Leave blank to keep current password</p>
-                    </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-2.5 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors shadow-lg shadow-purple-200 dark:shadow-none flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        Save Odoo Settings
-                    </button>
-                </div>
-            </form>
-        </div>
 
         <!-- About Section -->
         <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 text-center">

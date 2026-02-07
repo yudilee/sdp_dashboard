@@ -877,13 +877,14 @@
             colors: newColors,
             yaxis: yAxisConfig,
             chart: {
-                type: showTarget && !isStacked ? 'line' : 'bar', // If stacked, force bar even if target shown? Or mixed? Mixed stacked is hard in ApexCharts without exact config
+                type: 'bar', // Base type bar, series override
                 stacked: isStacked,
                 stackType: filter === 'percentage_stacked' ? '100%' : 'normal'
             },
             stroke: {
-                width: 0, // No border for cleaner look in stacked, or standard
-                curve: 'smooth'
+                width: newSeries.map(s => s.type === 'line' ? 4 : 0), // 4px width for lines, 0 for bars
+                curve: 'smooth',
+                dashArray: 0 // Solid lines
             },
             plotOptions: {
                 bar: {
