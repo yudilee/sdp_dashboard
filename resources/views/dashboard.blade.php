@@ -792,35 +792,15 @@
             }
         }
         else if (filter === 'percentage_stacked') {
-            // Calculate percentages 
+            // Use RAW values and let stackType: '100%' handle the percentage calculation
             newSeries = [
-                { 
-                    name: 'In Stock', 
-                    type: 'bar', 
-                    data: historyData.map(h => {
-                        const total = h.in_stock + h.rented + h.in_service;
-                        return total > 0 ? parseFloat(((h.in_stock / total) * 100).toFixed(1)) : 0;
-                    })
-                },
-                { 
-                    name: 'Rented', 
-                    type: 'bar', 
-                    data: historyData.map(h => {
-                        const total = h.in_stock + h.rented + h.in_service;
-                        return total > 0 ? parseFloat(((h.rented / total) * 100).toFixed(1)) : 0;
-                    })
-                },
-                { 
-                    name: 'In Service', 
-                    type: 'bar', 
-                    data: historyData.map(h => {
-                        const total = h.in_stock + h.rented + h.in_service;
-                        return total > 0 ? parseFloat(((h.in_service / total) * 100).toFixed(1)) : 0;
-                    })
-                }
+                { name: 'In Stock', type: 'bar', data: historyData.map(h => h.in_stock) },
+                { name: 'Rented', type: 'bar', data: historyData.map(h => h.rented) },
+                { name: 'In Service', type: 'bar', data: historyData.map(h => h.in_service) }
             ];
             newColors = ['#10b981', '#f59e0b', '#ef4444'];
-            yAxisConfig = [{ show: true, title: { text: 'Percentage (%)' }, max: 100 }];
+            // Do NOT force max: 100, let ApexCharts 100% stack mode handle the axis scale
+            yAxisConfig = [{ show: true, title: { text: 'Percentage (%)' } }];
             
             if (showTarget) {
                 const stockTgt = targetValues.in_stock_pct || 10;
