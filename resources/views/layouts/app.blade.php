@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'SDP Dashboard')</title>
+    <title>@yield('title', 'HARENT Dashboard')</title>
+    <link rel="icon" href="{{ asset('images/logo.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,10 +77,9 @@
     
     <!-- Mobile Header -->
     <header class="lg:hidden flex items-center justify-between p-4 glass sticky top-0 z-50">
-        <div class="flex items-center gap-2 font-bold text-xl text-indigo-600 dark:text-indigo-400">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            SDP<span class="text-slate-600 dark:text-slate-400">Stock</span>
-        </div>
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
+            <img src="{{ asset('images/logo.png') }}" alt="HARENT Stock" class="h-10 w-auto object-contain">
+        </a>
         <div class="flex items-center gap-2">
             <button @click="toggleTheme()" class="p-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none transition-colors">
                 <svg x-show="!isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -98,14 +98,10 @@
             class="fixed inset-y-0 left-0 z-40 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 lg:static transform flex flex-col w-64 h-screen lg:h-auto overflow-hidden">
             
             <!-- Sidebar Header -->
-            <div class="h-20 flex items-center justify-center border-b border-slate-100 flex-shrink-0" :class="sidebarCollapsed ? 'px-0' : 'px-6 justify-start gap-2'">
-                <div class="bg-indigo-600 text-white p-1.5 rounded-lg shadow-lg shadow-indigo-200 flex-shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <div class="font-bold text-xl text-indigo-600 whitespace-nowrap overflow-hidden transition-all duration-300" 
-                     :class="sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'" x-show="!sidebarCollapsed">
-                    SDP<span class="text-slate-600 font-light">Dashboard</span>
-                </div>
+            <div class="h-20 flex items-center justify-center border-b border-slate-100 flex-shrink-0" :class="sidebarCollapsed ? 'px-0' : 'px-6 justify-start'">
+                <img src="{{ asset('images/logo.png') }}" alt="HARENT Dashboard" 
+                     class="transition-all duration-300 object-contain"
+                     :class="sidebarCollapsed ? 'h-8 w-8' : 'h-12 w-auto'" />
             </div>
 
             <!-- Scrollable Nav -->
