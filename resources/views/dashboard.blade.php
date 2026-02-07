@@ -827,11 +827,11 @@
                 const rentalTgt = stockTgt + (targetValues.active_rental_pct || 82);
                 
                 newSeries.push(
-                    { name: 'Stock Limit', type: 'line', data: historyData.map(() => stockTgt) },
-                    { name: 'Rental Target', type: 'line', data: historyData.map(() => rentalTgt) }
+                    { name: 'Stock Target', type: 'line', data: historyData.map(() => stockTgt) },
+                    { name: 'Service Limit', type: 'line', data: historyData.map(() => rentalTgt) }
                 );
-                // Use distinctive colors for target lines (e.g. dark grey)
-                newColors.push('#334155', '#334155');
+                // Green for Stock Target, Red for Service Limit (upper bound)
+                newColors.push('#10b981', '#ef4444');
             }
         }
         else if (filter === 'locations') {
@@ -882,9 +882,9 @@
                 stackType: filter === 'percentage_stacked' ? '100%' : 'normal'
             },
             stroke: {
-                width: newSeries.map(s => s.type === 'line' ? 4 : 0), // 4px width for lines, 0 for bars
-                curve: 'smooth',
-                dashArray: 0 // Solid lines
+                width: newSeries.map(s => s.type === 'line' ? 2 : 0), // Thinner lines (2px)
+                curve: 'straight', // Straight lines for targets look cleaner
+                dashArray: newSeries.map(s => s.type === 'line' ? 5 : 0) // Dashed lines for targets
             },
             plotOptions: {
                 bar: {
