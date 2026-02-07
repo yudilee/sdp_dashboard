@@ -3,6 +3,88 @@
 @section('title', 'Details - SDP Stock')
 
 @section('content')
+<style>
+/* Frozen Table Styles - Like Excel Freeze Panes */
+.frozen-table-container {
+    max-height: calc(100vh - 280px);
+    overflow: auto;
+    position: relative;
+}
+
+.frozen-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Sticky Header Row */
+.frozen-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.frozen-table thead th {
+    background: rgb(248 250 252); /* slate-50 */
+}
+
+.dark .frozen-table thead th {
+    background: rgb(23 23 23); /* slate-950 */
+}
+
+/* Sticky First Column (Lot Number) */
+.frozen-table th.sticky-col,
+.frozen-table td.sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+}
+
+/* Header + First Column intersection needs highest z-index */
+.frozen-table thead th.sticky-col {
+    z-index: 30;
+    background: rgb(248 250 252);
+}
+
+.dark .frozen-table thead th.sticky-col {
+    background: rgb(23 23 23);
+}
+
+/* Background color for sticky cells in tbody */
+.frozen-table tbody td.sticky-col {
+    background: rgb(255 255 255); /* white */
+}
+
+.dark .frozen-table tbody td.sticky-col {
+    background: rgb(15 23 42); /* slate-900 */
+}
+
+/* Hover state for sticky cells */
+.frozen-table tbody tr:hover td.sticky-col {
+    background: rgb(248 250 252 / 0.5);
+}
+
+.dark .frozen-table tbody tr:hover td.sticky-col {
+    background: rgb(30 41 59 / 0.5);
+}
+
+/* Shadow effect for frozen column when scrolled */
+.frozen-table th.sticky-col::after,
+.frozen-table td.sticky-col::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -8px;
+    bottom: 0;
+    width: 8px;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+    pointer-events: none;
+}
+
+.dark .frozen-table th.sticky-col::after,
+.dark .frozen-table td.sticky-col::after {
+    background: linear-gradient(to right, rgba(0,0,0,0.2), transparent);
+}
+</style>
 <div x-data="itemTable()" x-init="init()" class="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden theme-transition">
     
     <!-- Toolbar -->
@@ -96,11 +178,11 @@
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto custom-scrollbar">
-        <table class="w-full text-left border-collapse" style="table-layout: fixed;">
+    <div class="frozen-table-container custom-scrollbar">
+        <table class="frozen-table w-full text-left" style="table-layout: fixed; min-width: 1200px;">
             <thead class="bg-slate-50 dark:bg-slate-950 sticky top-0 z-10 text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">
                 <tr>
-                    <th x-show="columns.lot_number.visible" :style="'width: ' + columns.lot_number.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                    <th x-show="columns.lot_number.visible" :style="'width: ' + columns.lot_number.width + 'px'" class="sticky-col relative p-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
                         <div @click="sortBy('lot_number')" class="flex items-center gap-1">Lot Number <span x-show="sortCol === 'lot_number'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                         <div @mousedown="startResize($event, 'lot_number')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                     </th>
@@ -158,7 +240,7 @@
             <tbody class="divide-y divide-slate-50 dark:divide-slate-800">
                 <template x-for="item in paginatedItems" :key="item.id">
                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
-                        <td x-show="columns.lot_number.visible" class="p-4 font-mono text-sm font-medium text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-800 dark:group-hover:text-indigo-300 break-words" x-text="item.lot_number"></td>
+                        <td x-show="columns.lot_number.visible" class="sticky-col p-4 font-mono text-sm font-medium text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-800 dark:group-hover:text-indigo-300 break-words" x-text="item.lot_number"></td>
                         <td x-show="columns.product.visible" class="p-4 break-words">
                             <div class="font-medium text-slate-800 dark:text-slate-200" x-text="item.product"></div>
                             <div class="text-xs text-slate-400 dark:text-slate-500" x-text="item.internal_reference || 'No Ref'"></div>

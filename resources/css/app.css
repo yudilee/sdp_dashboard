@@ -64,6 +64,7 @@
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -77,4 +78,84 @@
 
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
     background-color: rgba(99, 102, 241, 0.5);
+}
+
+/* Frozen Table Styles - Like Excel Freeze Panes */
+.frozen-table-container {
+    max-height: calc(100vh - 280px);
+    overflow: auto;
+    position: relative;
+}
+
+.frozen-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Sticky Header Row */
+.frozen-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgb(248 250 252);
+    /* slate-50 */
+}
+
+.dark .frozen-table thead th {
+    background: rgb(23 23 23);
+    /* slate-950 */
+}
+
+/* Sticky First Column (Lot Number) */
+.frozen-table th.sticky-col,
+.frozen-table td.sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: inherit;
+}
+
+/* Header + First Column intersection needs highest z-index */
+.frozen-table thead th.sticky-col {
+    z-index: 30;
+}
+
+/* Background color for sticky cells */
+.frozen-table tbody td.sticky-col {
+    background: rgb(255 255 255);
+    /* white */
+}
+
+.dark .frozen-table tbody td.sticky-col {
+    background: rgb(15 23 42);
+    /* slate-900 */
+}
+
+/* Hover state for sticky cells */
+.frozen-table tbody tr:hover td.sticky-col {
+    background: rgb(248 250 252);
+    /* slate-50/50 */
+}
+
+.dark .frozen-table tbody tr:hover td.sticky-col {
+    background: rgb(30 41 59);
+    /* slate-800/50 */
+}
+
+/* Shadow effect for frozen column when scrolled */
+.frozen-table th.sticky-col::after,
+.frozen-table td.sticky-col::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -8px;
+    bottom: 0;
+    width: 8px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.05), transparent);
+    pointer-events: none;
+}
+
+.dark .frozen-table th.sticky-col::after,
+.dark .frozen-table td.sticky-col::after {
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.2), transparent);
 }

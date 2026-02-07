@@ -41,7 +41,7 @@ class SyncOdooScheduled extends Command
 
             $this->info("Processing {$result['count']} items...");
             $processedData = $generator->generate($result['data']);
-            $generator->saveToDatabase($processedData['items'], $processedData['summary']);
+            $generator->saveToDatabase($processedData['items'], $processedData['summary'], 'odoo_scheduled');
 
             // Update last sync time
             Setting::setValue('odoo_last_sync', now()->toISOString());

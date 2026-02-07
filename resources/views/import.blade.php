@@ -109,8 +109,14 @@
     isSavingSchedule: false,
     scheduleResult: null,
 
+    // Import History
+    historyData: [],
+    isLoadingHistory: false,
+    expandedLogId: null,
+
     async init() {
         await this.loadSchedule();
+        await this.loadHistory();
     },
 
     async loadSchedule() {
@@ -164,6 +170,26 @@
         if (!dateStr) return 'Never';
         const date = new Date(dateStr);
         return date.toLocaleString();
+    },
+
+    async loadHistory() {
+        this.isLoadingHistory = true;
+        try {
+            const response = await fetch('{{ route('import.history') }}');
+            this.historyData = await response.json();
+        } catch (e) {
+            console.error('Failed to load history:', e);
+        } finally {
+            this.isLoadingHistory = false;
+        }
+    },
+
+    toggleExpand(logId) {
+        this.expandedLogId = this.expandedLogId === logId ? null : logId;
+    },
+
+    formatNumber(num) {
+        return new Intl.NumberFormat().format(num || 0);
     }
 }">
     <!-- Password Modal -->
@@ -229,6 +255,12 @@
                     class="flex items-center gap-2 px-6 py-4 font-medium transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 Odoo API
+            </button>
+            <button @click="activeTab = 'history'; loadHistory()"
+                    :class="activeTab === 'history' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
+                    class="flex items-center gap-2 px-6 py-4 font-medium transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                History
             </button>
         </div>
 
@@ -440,6 +472,139 @@
                             The Odoo sync requires PHP's <code class="px-1 py-0.5 bg-blue-100 dark:bg-blue-800 rounded">xmlrpc</code> extension. 
                             Data mapping may need configuration based on your Odoo model structure.
                         </p>
+                </div>
+            </div>
+            </div>
+
+            <!-- History Tab -->
+            <div x-show="activeTab === 'history'" x-transition>
+                <div class="max-w-4xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100">Import History</h3>
+                            <p class="text-slate-500 dark:text-slate-400">View past data imports and their summaries</p>
+                        </div>
+                        <button @click="loadHistory()" 
+                                :disabled="isLoadingHistory"
+                                class="px-4 py-2 text-sm bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
+                            <svg :class="isLoadingHistory ? 'animate-spin' : ''" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div x-show="isLoadingHistory" class="text-center py-12">
+                        <svg class="animate-spin h-8 w-8 mx-auto text-indigo-500" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <p class="mt-2 text-slate-500 dark:text-slate-400">Loading history...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div x-show="!isLoadingHistory && historyData.length === 0" class="text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                        <svg class="w-12 h-12 mx-auto text-slate-400 dark:text-slate-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p class="text-slate-500 dark:text-slate-400">No import history yet</p>
+                        <p class="text-sm text-slate-400 dark:text-slate-500 mt-1">Import data via Excel or Odoo to see history here</p>
+                    </div>
+
+                    <!-- History Table -->
+                    <div x-show="!isLoadingHistory && historyData.length > 0" class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+                        <table class="w-full">
+                            <thead class="bg-slate-50 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date & Time</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Source</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">File</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Items</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
+                                <template x-for="log in historyData" :key="log.id">
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                        <td class="px-4 py-3">
+                                            <span class="text-sm text-slate-700 dark:text-slate-300" x-text="formatDate(log.imported_at)"></span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                                                  :class="{
+                                                      'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400': log.source === 'excel',
+                                                      'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400': log.source === 'odoo_manual',
+                                                      'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400': log.source === 'odoo_scheduled'
+                                                  }">
+                                                <svg x-show="log.source === 'excel'" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                <svg x-show="log.source.startsWith('odoo')" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                <span x-text="log.source_label"></span>
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px] block" x-text="log.filename || '—'"></span>
+                                        </td>
+                                        <td class="px-4 py-3 text-right">
+                                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300" x-text="formatNumber(log.items_count)"></span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
+                                                  :class="log.status === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
+                                                <svg x-show="log.status === 'success'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                <svg x-show="log.status !== 'success'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                <span x-text="log.status === 'success' ? 'Success' : 'Failed'"></span>
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <button @click="toggleExpand(log.id)" 
+                                                    class="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
+                                                <svg class="w-4 h-4 transition-transform" :class="expandedLogId === log.id ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Expanded Summary Panel -->
+                        <template x-for="log in historyData" :key="'summary-' + log.id">
+                            <div x-show="expandedLogId === log.id" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 class="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4">
+                                <template x-if="log.error_message">
+                                    <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
+                                        <strong>Error:</strong> <span x-text="log.error_message"></span>
+                                    </div>
+                                </template>
+                                <template x-if="log.summary">
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div class="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">SDP Stock</p>
+                                            <p class="text-lg font-semibold text-slate-800 dark:text-slate-200" x-text="formatNumber(log.summary.sdp_stock)"></p>
+                                        </div>
+                                        <div class="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">In Stock</p>
+                                            <p class="text-lg font-semibold text-slate-800 dark:text-slate-200" x-text="formatNumber(log.summary.in_stock?.total)"></p>
+                                        </div>
+                                        <div class="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">Rented</p>
+                                            <p class="text-lg font-semibold text-slate-800 dark:text-slate-200" x-text="formatNumber(log.summary.rented_in_customer?.total)"></p>
+                                        </div>
+                                        <div class="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">Vendor Rent</p>
+                                            <p class="text-lg font-semibold text-slate-800 dark:text-slate-200" x-text="formatNumber(log.summary.vendor_rent)"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>

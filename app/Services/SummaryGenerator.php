@@ -537,10 +537,21 @@ class SummaryGenerator
         return $tags;
     }
 
-    public function saveToDatabase($items, $summary)
+    public function saveToDatabase($items, $summary, $source = 'excel', $filename = null)
     {
-        // 1. Save Items
-        \App\Models\Item::truncate();
+        // 0. Log Import Start
+        $importLog = \App\Models\ImportLog::create([
+            'source' => $source,
+            'filename' => $filename,
+            'imported_at' => now(),
+            'items_count' => count($items),
+            'summary_json' => $summary,
+            'status' => 'success',
+        ]);
+
+        try {
+            // 1. Save Items
+            \App\Models\Item::truncate();
         
         $chunkedItems = array_chunk($items, 500);
         foreach ($chunkedItems as $chunk) {
@@ -602,6 +613,14 @@ class SummaryGenerator
         
         // 3. Update Metadata (optional now as History handles date, but for compat)
         // We can retire the JSON metadata file usage in Controller.
+        } catch (\Exception $e) {
+            // Update import log with failure status
+            $importLog->update([
+                'status' => 'failed',
+                'error_message' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
     }
 
     private function excelDateToCarbon($serial)

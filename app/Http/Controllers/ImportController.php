@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Setting;
 use App\Services\OdooService;
 use App\Services\SummaryGenerator;
+use App\Models\ImportLog;
 
 class ImportController extends Controller
 {
@@ -32,7 +33,8 @@ class ImportController extends Controller
         
         try {
             $result = $generator->generate($file);
-            $generator->saveToDatabase($result['items'], $result['summary']);
+            $originalFilename = $file->getClientOriginalName();
+            $generator->saveToDatabase($result['items'], $result['summary'], 'excel', $originalFilename);
             
             return redirect()->back()->with('success', 'Excel data imported successfully! ' . count($result['items']) . ' items processed.');
         } catch (\Exception $e) {
@@ -94,7 +96,7 @@ class ImportController extends Controller
             $processedData = $generator->generate($result['data']);
             
             // Save to database (same as Excel import)
-            $generator->saveToDatabase($processedData['items'], $processedData['summary']);
+            $generator->saveToDatabase($processedData['items'], $processedData['summary'], 'odoo_manual');
             
             return response()->json([
                 'success' => true,
@@ -140,5 +142,31 @@ class ImportController extends Controller
                 ? "Auto-sync enabled ({$validated['interval']})" 
                 : 'Auto-sync disabled',
         ]);
+    }
+
+    /**
+     * Get import history
+     */
+    public function history(): JsonResponse
+    {
+        $logs = ImportLog::orderBy('imported_at', 'desc')
+            ->take(50)
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'source' => $log->source,
+                    'source_label' => $log->source_label,
+                    'filename' => $log->filename,
+                    'imported_at' => $log->imported_at->toIso8601String(),
+                    'items_count' => $log->items_count,
+                    'status' => $log->status,
+                    'status_color' => $log->status_color,
+                    'error_message' => $log->error_message,
+                    'summary' => $log->summary_json,
+                ];
+            });
+
+        return response()->json($logs);
     }
 }

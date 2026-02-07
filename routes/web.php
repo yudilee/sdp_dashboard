@@ -16,6 +16,7 @@ Route::post('/import/odoo/test', [ImportController::class, 'testOdooConnection']
 Route::post('/import/odoo/sync', [ImportController::class, 'syncOdoo'])->name('import.odoo.sync');
 Route::get('/import/odoo/schedule', [ImportController::class, 'getSchedule'])->name('import.odoo.schedule.get');
 Route::post('/import/odoo/schedule', [ImportController::class, 'saveSchedule'])->name('import.odoo.schedule.save');
+Route::get('/import/history', [ImportController::class, 'history'])->name('import.history');
 Route::get('/details', [DashboardController::class, 'details'])->name('details');
 Route::get('/export', [DashboardController::class, 'export'])->name('export');
 Route::get('/print', [DashboardController::class, 'print'])->name('print');
