@@ -9,7 +9,7 @@
         return {
             pairs: Object.values(data),
             search: '',
-            filter: 'all', // all, service, stock, customer, other
+            filter: '{{ request()->query("filter", "all") }}', // all, service, stock, customer, other
             
             get filteredPairs() {
                 // First filter by category

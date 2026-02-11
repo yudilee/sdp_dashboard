@@ -268,19 +268,29 @@
 
         <!-- Rental Pairs -->
         @if(isset($summary['rental_pairs_count']) && $summary['rental_pairs_count'] > 0)
-        <a href="{{ route('rental.pairs') }}" class="group bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 p-6 rounded-2xl shadow-sm dark:shadow-none border border-amber-200 dark:border-amber-800/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+        <div class="group bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 p-6 rounded-2xl shadow-sm dark:shadow-none border border-amber-200 dark:border-amber-800/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500 rounded-l-2xl"></div>
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-1">Rental Pairs</p>
-                    <h3 class="text-3xl font-bold text-slate-800 dark:text-slate-100">{{ $summary['rental_pairs_count'] }}</h3>
+            
+            <a href="{{ route('rental.pairs') }}" class="block">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-1">Rental Pairs</p>
+                        <h3 class="text-3xl font-bold text-slate-800 dark:text-slate-100">{{ $summary['rental_pairs_count'] }}</h3>
+                    </div>
+                    <div class="p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-amber-500 dark:text-amber-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    </div>
                 </div>
-                <div class="p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-amber-500 dark:text-amber-400">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                </div>
+                <p class="mt-4 text-xs font-semibold text-amber-700 dark:text-amber-400">Active paired vehicles</p>
+            </a>
+            
+            <div class="mt-4 pt-4 border-t border-amber-200/50 dark:border-amber-700/50">
+                <a href="{{ route('rental.pairs', ['filter' => 'customer']) }}" class="flex items-center gap-2 text-xs font-bold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors group/link animate-pulse">
+                    <span class="uppercase tracking-wide">Check Rental Pair Position</span>
+                    <svg class="w-3 h-3 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
             </div>
-            <p class="mt-4 text-xs font-semibold text-amber-700 dark:text-amber-400">Active paired vehicles</p>
-        </a>
+        </div>
         @else
         <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl shadow-inner border border-slate-200 dark:border-slate-800 opacity-75">
             <p class="text-sm font-bold text-slate-400 uppercase tracking-wide mb-1">Rental Pairs</p>
