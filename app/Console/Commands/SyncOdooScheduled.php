@@ -43,6 +43,11 @@ class SyncOdooScheduled extends Command
             $processedData = $generator->generate($result['data']);
             $generator->saveToDatabase($processedData['items'], $processedData['summary'], 'odoo_scheduled');
 
+            // Enrich in-service items with repair order data
+            $this->info('Enriching in-service items with repair data...');
+            $importController = new \App\Http\Controllers\ImportController();
+            $importController->enrichWithRepairData($odooService);
+
             // Update last sync time
             Setting::setValue('odoo_last_sync', now()->toISOString());
 

@@ -236,6 +236,163 @@ class OdooService
     }
 
     /**
+     * Fetch current (under_repair) repair orders for the given lot IDs.
+     * Returns a map of lot_name => repair_data.
+     *
+     * @param array $lotMap [lot_number => odoo_lot_id]
+     * @return array [lot_number => ['name' => ..., 'state' => ..., ...]]
+     */
+    public function fetchRepairOrders(array $lotMap): array
+    {
+        if (empty($lotMap)) {
+            return [];
+        }
+
+        $odooLotIds = array_values($lotMap);
+        $lotIdToName = array_flip($lotMap); // odoo_lot_id => lot_number
+
+        try {
+            // Search for repair orders that are currently under repair
+            $domain = [
+                ['lot_id', 'in', $odooLotIds],
+                ['state', '=', 'under_repair'],
+            ];
+
+            $repairIds = $this->execute('repair.order', 'search', [$domain]);
+
+            if (empty($repairIds)) {
+                return [];
+            }
+
+            $fields = [
+                'name', 'state', 'schedule_date', 'service_type',
+                'vendor_id', 'km_pickup', 'estimation_end_date', 'lot_id',
+            ];
+
+            $repairs = $this->execute('repair.order', 'read', [$repairIds, $fields]);
+
+            $result = [];
+            foreach ($repairs as $repair) {
+                // lot_id is [id, name]
+                $lotId = is_array($repair['lot_id']) ? $repair['lot_id'][0] : $repair['lot_id'];
+                $lotName = $lotIdToName[$lotId] ?? null;
+
+                if (!$lotName) {
+                    continue;
+                }
+
+                // If multiple active repairs exist for the same lot, take the most recent
+                $result[$lotName] = [
+                    'repair_order_name' => $repair['name'] ?? '',
+                    'repair_state' => $repair['state'] ?? '',
+                    'repair_schedule_date' => $repair['schedule_date'] ? substr($repair['schedule_date'], 0, 10) : null,
+                    'repair_service_type' => $repair['service_type'] ?? '',
+                    'repair_vendor' => is_array($repair['vendor_id']) ? $repair['vendor_id'][1] : ($repair['vendor_id'] ?? ''),
+                    'repair_odometer' => $repair['km_pickup'] ?? null,
+                    'repair_estimation_end' => $repair['estimation_end_date'] ? substr($repair['estimation_end_date'], 0, 10) : null,
+                ];
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            \Log::warning('Failed to fetch repair orders: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Fetch full repair history for a specific lot number.
+     *
+     * @param string $lotNumber
+     * @return array ['success' => bool, 'data' => [...]]
+     */
+    public function fetchRepairHistory(string $lotNumber): array
+    {
+        try {
+            // 1. Find the lot ID
+            $lotIds = $this->execute('stock.lot', 'search', [
+                [['name', '=', $lotNumber]]
+            ]);
+
+            if (empty($lotIds)) {
+                return ['success' => false, 'message' => "Lot {$lotNumber} not found", 'data' => []];
+            }
+
+            $lotId = $lotIds[0];
+
+            // 2. Search all repair orders for this lot
+            $repairIds = $this->execute('repair.order', 'search', [
+                [['lot_id', '=', $lotId]]
+            ]);
+
+            if (empty($repairIds)) {
+                return ['success' => true, 'data' => []];
+            }
+
+            $fields = [
+                'name', 'state', 'schedule_date', 'service_type',
+                'vendor_id', 'km_pickup', 'estimation_end_date',
+                'repair_end_datetime', 'create_date',
+            ];
+
+            $repairs = $this->execute('repair.order', 'read', [$repairIds, $fields]);
+
+            $data = [];
+            foreach ($repairs as $repair) {
+                $data[] = [
+                    'name' => $repair['name'] ?? '',
+                    'state' => $repair['state'] ?? '',
+                    'schedule_date' => $repair['schedule_date'] ? substr($repair['schedule_date'], 0, 10) : null,
+                    'service_type' => $repair['service_type'] ?? '',
+                    'vendor' => is_array($repair['vendor_id']) ? $repair['vendor_id'][1] : ($repair['vendor_id'] ?? ''),
+                    'km_pickup' => $repair['km_pickup'] ?? null,
+                    'estimation_end_date' => $repair['estimation_end_date'] ? substr($repair['estimation_end_date'], 0, 10) : null,
+                    'repair_end_datetime' => $repair['repair_end_datetime'] ? substr($repair['repair_end_datetime'], 0, 10) : null,
+                    'create_date' => $repair['create_date'] ? substr($repair['create_date'], 0, 10) : null,
+                ];
+            }
+
+            return ['success' => true, 'data' => $data];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage(), 'data' => []];
+        }
+    }
+
+    /**
+     * Resolve lot numbers to Odoo stock.lot IDs.
+     *
+     * @param array $lotNumbers
+     * @return array [lot_number => odoo_lot_id]
+     */
+    public function resolveLotIds(array $lotNumbers): array
+    {
+        if (empty($lotNumbers)) {
+            return [];
+        }
+
+        try {
+            $domain = [['name', 'in', $lotNumbers]];
+            $ids = $this->execute('stock.lot', 'search', [$domain]);
+
+            if (empty($ids)) {
+                return [];
+            }
+
+            $lots = $this->execute('stock.lot', 'read', [$ids, ['name']]);
+
+            $map = [];
+            foreach ($lots as $lot) {
+                $map[$lot['name']] = $lot['id'];
+            }
+
+            return $map;
+        } catch (\Exception $e) {
+            \Log::warning('Failed to resolve lot IDs: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Authenticate with Odoo and return user ID
      */
     protected function authenticate(): ?int
@@ -263,7 +420,7 @@ class OdooService
     /**
      * Execute a method on an Odoo model
      */
-    protected function execute(string $model, string $method, array $args = [], array $kwargs = []): mixed
+    public function execute(string $model, string $method, array $args = [], array $kwargs = []): mixed
     {
         if (!$this->uid) {
             $this->authenticate();

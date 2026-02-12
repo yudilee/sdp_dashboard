@@ -98,6 +98,9 @@ class ImportController extends Controller
             // Save to database (same as Excel import)
             $generator->saveToDatabase($processedData['items'], $processedData['summary'], 'odoo_manual');
             
+            // --- Repair Order Enrichment ---
+            $this->enrichWithRepairData($odoo);
+            
             return response()->json([
                 'success' => true,
                 'message' => "Synced {$result['count']} items from Odoo",
@@ -107,6 +110,60 @@ class ImportController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Sync failed: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Enrich in-service items with repair order data from Odoo.
+     */
+    public function enrichWithRepairData(OdooService $odoo): void
+    {
+        $serviceLocations = [
+            \App\Constants\Location::SERVICE_EXTERNAL,
+            \App\Constants\Location::SERVICE_INTERNAL,
+            \App\Constants\Location::INSURANCE,
+        ];
+
+        // Find all in-service items
+        $inServiceItems = \App\Models\Item::where(function ($q) use ($serviceLocations) {
+            foreach ($serviceLocations as $loc) {
+                $q->orWhere('location', 'like', $loc . '%');
+            }
+        })->whereNotNull('lot_number')->pluck('lot_number')->unique()->toArray();
+
+        if (empty($inServiceItems)) {
+            return;
+        }
+
+        // Resolve lot numbers to Odoo IDs
+        $lotMap = $odoo->resolveLotIds($inServiceItems);
+
+        if (empty($lotMap)) {
+            return;
+        }
+
+        // Fetch active repair orders
+        $repairData = $odoo->fetchRepairOrders($lotMap);
+
+        // Update items with repair data
+        foreach ($repairData as $lotNumber => $data) {
+            \App\Models\Item::where('lot_number', $lotNumber)->update($data);
+        }
+
+        // Clear repair data for in-service items that have NO active repair
+        $lotsWithRepairs = array_keys($repairData);
+        $lotsWithoutRepairs = array_diff($inServiceItems, $lotsWithRepairs);
+
+        if (!empty($lotsWithoutRepairs)) {
+            \App\Models\Item::whereIn('lot_number', $lotsWithoutRepairs)->update([
+                'repair_order_name' => null,
+                'repair_state' => null,
+                'repair_schedule_date' => null,
+                'repair_service_type' => null,
+                'repair_vendor' => null,
+                'repair_odometer' => null,
+                'repair_estimation_end' => null,
             ]);
         }
     }

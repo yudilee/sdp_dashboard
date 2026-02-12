@@ -60,11 +60,11 @@
 
 /* Hover state for sticky cells */
 .frozen-table tbody tr:hover td.sticky-col {
-    background: rgb(248 250 252 / 0.5);
+    background: rgb(248 250 252); /* fully opaque slate-50 */
 }
 
 .dark .frozen-table tbody tr:hover td.sticky-col {
-    background: rgb(30 41 59 / 0.5);
+    background: rgb(30 41 59); /* fully opaque slate-800 */
 }
 
 /* Shadow effect for frozen column when scrolled */
@@ -235,6 +235,35 @@
                         Stock
                         <div @mousedown="startResize($event, 'in_stock')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                     </th>
+                    <!-- Repair Order Columns -->
+                    <th x-show="columns.repair_order.visible" :style="'width: ' + columns.repair_order.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left select-none group">
+                        Repair Order
+                        <div @mousedown="startResize($event, 'repair_order')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
+                    <th x-show="columns.repair_jo_date.visible" :style="'width: ' + columns.repair_jo_date.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
+                        JO Date
+                        <div @mousedown="startResize($event, 'repair_jo_date')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
+                    <th x-show="columns.repair_service_type.visible" :style="'width: ' + columns.repair_service_type.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
+                        Service Type
+                        <div @mousedown="startResize($event, 'repair_service_type')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
+                    <th x-show="columns.repair_vendor.visible" :style="'width: ' + columns.repair_vendor.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left select-none group">
+                        Vendor
+                        <div @mousedown="startResize($event, 'repair_vendor')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
+                    <th x-show="columns.repair_odometer.visible" :style="'width: ' + columns.repair_odometer.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
+                        Odometer
+                        <div @mousedown="startResize($event, 'repair_odometer')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
+                    <th x-show="columns.repair_est_end.visible" :style="'width: ' + columns.repair_est_end.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
+                        Est. End
+                        <div @mousedown="startResize($event, 'repair_est_end')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
+                    <th x-show="columns.repair_history.visible" :style="'width: ' + columns.repair_history.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
+                        History
+                        <div @mousedown="startResize($event, 'repair_history')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-50 dark:divide-slate-800">
@@ -275,9 +304,43 @@
                         <td x-show="columns.vehicle_role.visible" class="p-4 text-center">
                             <span x-show="item.vehicle_role" class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400" x-text="item.vehicle_role"></span>
                         </td>
-                        <td x-show="columns.linked.visible" class="p-4 text-center text-xs text-slate-400 dark:text-slate-500 font-mono" x-text="item.linked_vehicle || '-'"></td>
+                        <td x-show="columns.linked.visible" class="p-4 text-center text-xs font-mono">
+                            <template x-if="item.linked_vehicle && item.linked_vehicle !== '-'">
+                                <div class="flex flex-wrap gap-1 justify-center">
+                                    <template x-for="lot in item.linked_vehicle.split(',')" :key="lot">
+                                        <a :href="'/details?category=search&q=' + encodeURIComponent(lot.trim())" 
+                                           class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline cursor-pointer"
+                                           x-text="lot.trim()"></a>
+                                    </template>
+                                </div>
+                            </template>
+                            <template x-if="!item.linked_vehicle || item.linked_vehicle === '-'">
+                                <span class="text-slate-300 dark:text-slate-600">-</span>
+                            </template>
+                        </td>
                         <td x-show="columns.in_stock.visible" class="p-4 text-center">
                             <span class="w-2 h-2 inline-block rounded-full" :class="item.in_stock ? 'bg-green-500' : 'bg-red-400 dark:bg-red-500'"></span>
+                        </td>
+                        <!-- Repair Order Data -->
+                        <td x-show="columns.repair_order.visible" class="p-4 text-xs">
+                            <span x-show="item.repair_order_name" class="font-mono font-medium text-orange-600 dark:text-orange-400" x-text="item.repair_order_name"></span>
+                            <span x-show="!item.repair_order_name" class="text-slate-300 dark:text-slate-600">-</span>
+                        </td>
+                        <td x-show="columns.repair_jo_date.visible" class="p-4 text-center text-xs text-slate-500 dark:text-slate-400" x-text="formatDate(item.repair_schedule_date)"></td>
+                        <td x-show="columns.repair_service_type.visible" class="p-4 text-center">
+                            <span x-show="item.repair_service_type" class="px-2 py-0.5 rounded text-[10px] font-bold" :class="item.repair_service_type === 'accident' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'" x-text="item.repair_service_type"></span>
+                            <span x-show="!item.repair_service_type" class="text-slate-300 dark:text-slate-600">-</span>
+                        </td>
+                        <td x-show="columns.repair_vendor.visible" class="p-4 text-xs text-slate-600 dark:text-slate-400 break-words" x-text="item.repair_vendor || '-'"></td>
+                        <td x-show="columns.repair_odometer.visible" class="p-4 text-center text-xs text-slate-500 dark:text-slate-400">
+                            <span x-show="item.repair_odometer" x-text="Number(item.repair_odometer).toLocaleString() + ' km'"></span>
+                            <span x-show="!item.repair_odometer" class="text-slate-300 dark:text-slate-600">-</span>
+                        </td>
+                        <td x-show="columns.repair_est_end.visible" class="p-4 text-center text-xs text-slate-500 dark:text-slate-400" x-text="formatDate(item.repair_estimation_end)"></td>
+                        <td x-show="columns.repair_history.visible" class="p-4 text-center">
+                            <button @click="openRepairHistory(item.lot_number)" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors border border-orange-200 dark:border-orange-800">
+                                🔧 History
+                            </button>
                         </td>
                     </tr>
                 </template>
@@ -295,6 +358,86 @@
         <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors shadow-sm">Previous</button>
         <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span></span>
         <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors shadow-sm">Next</button>
+    </div>
+
+    <!-- Repair History Modal -->
+    <div x-show="repairHistoryModal.open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.escape.window="repairHistoryModal.open = false">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="repairHistoryModal.open = false"></div>
+        <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-3xl max-h-[80vh] flex flex-col">
+            <!-- Header -->
+            <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        🔧 Repair History
+                    </h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                        Lot: <span class="font-mono font-medium text-indigo-600 dark:text-indigo-400" x-text="repairHistoryModal.lotNumber"></span>
+                    </p>
+                </div>
+                <button @click="repairHistoryModal.open = false" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- Body -->
+            <div class="flex-1 overflow-auto p-5">
+                <!-- Loading -->
+                <div x-show="repairHistoryModal.loading" class="flex items-center justify-center py-12">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                    <span class="ml-3 text-slate-500 dark:text-slate-400">Fetching from Odoo...</span>
+                </div>
+                <!-- Error -->
+                <div x-show="repairHistoryModal.error" class="text-center py-8">
+                    <div class="text-red-500 dark:text-red-400 text-sm" x-text="repairHistoryModal.error"></div>
+                </div>
+                <!-- Empty -->
+                <div x-show="!repairHistoryModal.loading && !repairHistoryModal.error && repairHistoryModal.data.length === 0" class="text-center py-8">
+                    <div class="text-slate-400 dark:text-slate-500">No repair history found for this vehicle.</div>
+                </div>
+                <!-- Data Table -->
+                <div x-show="!repairHistoryModal.loading && !repairHistoryModal.error && repairHistoryModal.data.length > 0">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 dark:bg-slate-800 text-xs uppercase text-slate-500 dark:text-slate-400">
+                            <tr>
+                                <th class="p-3 rounded-tl-lg">Order</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3">Date</th>
+                                <th class="p-3">Type</th>
+                                <th class="p-3">Vendor</th>
+                                <th class="p-3">KM</th>
+                                <th class="p-3">Est. End</th>
+                                <th class="p-3 rounded-tr-lg">Completed</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <template x-for="(r, i) in repairHistoryModal.data" :key="i">
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                    <td class="p-3 font-mono font-medium text-orange-600 dark:text-orange-400 text-xs" x-text="r.name"></td>
+                                    <td class="p-3">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold" :class="{
+                                            'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400': r.state === 'under_repair',
+                                            'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400': r.state === 'done',
+                                            'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300': r.state !== 'under_repair' && r.state !== 'done'
+                                        }" x-text="r.state"></span>
+                                    </td>
+                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400" x-text="r.schedule_date || '-'"></td>
+                                    <td class="p-3">
+                                        <span x-show="r.service_type" class="px-2 py-0.5 rounded text-[10px] font-bold" :class="r.service_type === 'accident' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'" x-text="r.service_type"></span>
+                                        <span x-show="!r.service_type" class="text-slate-300">-</span>
+                                    </td>
+                                    <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="r.vendor || '-'"></td>
+                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400">
+                                        <span x-show="r.km_pickup" x-text="Number(r.km_pickup).toLocaleString()"></span>
+                                        <span x-show="!r.km_pickup" class="text-slate-300">-</span>
+                                    </td>
+                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400" x-text="r.estimation_end_date || '-'"></td>
+                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400" x-text="r.repair_end_datetime || '-'"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -322,14 +465,30 @@
                 location: { label: 'Location', visible: true, width: 140 },
                 qty: { label: 'Qty', visible: true, width: 60 },
                 type: { label: 'Type', visible: true, width: 80 },
-                current_customer: { label: 'Customer', visible: true, width: 150 }, // New
-                warehouse: { label: 'Warehouse', visible: true, width: 120 }, // New
+                current_customer: { label: 'Customer', visible: true, width: 150 },
+                warehouse: { label: 'Warehouse', visible: true, width: 120 },
                 status: { label: 'Rental Status', visible: true, width: 140 },
                 start_date: { label: 'Start', visible: false, width: 100 },
                 end_date: { label: 'End', visible: false, width: 100 },
                 vehicle_role: { label: 'Role', visible: false, width: 80 },
                 linked: { label: 'Linked', visible: false, width: 100 },
-                in_stock: { label: 'Stock', visible: false, width: 60 }
+                in_stock: { label: 'Stock', visible: false, width: 60 },
+                repair_order: { label: 'Repair Order', visible: false, width: 160 },
+                repair_jo_date: { label: 'JO Date', visible: false, width: 100 },
+                repair_service_type: { label: 'Service Type', visible: false, width: 100 },
+                repair_vendor: { label: 'Vendor', visible: false, width: 150 },
+                repair_odometer: { label: 'Odometer', visible: false, width: 100 },
+                repair_est_end: { label: 'Est. End', visible: false, width: 100 },
+                repair_history: { label: 'History', visible: true, width: 80 }
+            },
+            
+            // Repair History Modal State
+            repairHistoryModal: {
+                open: false,
+                lotNumber: '',
+                loading: false,
+                error: null,
+                data: []
             },
             
             resizingCol: null,
@@ -337,6 +496,11 @@
             startWidth: 0,
 
             init() {
+                // Auto-show repair columns for service categories
+                const category = '{{ $category ?? '' }}';
+                const serviceCategories = ['external_service', 'service_external', 'internal_service', 'service_internal', 'insurance', 'service_insurance', 'in_service'];
+                const isServiceView = serviceCategories.includes(category);
+                
                 // Load saved columns
                 let saved = localStorage.getItem('sdp_table_columns');
                 if (saved) {
@@ -352,6 +516,17 @@
                     } catch (e) {
                         console.error('Failed to load table prefs', e);
                     }
+                }
+                
+                // Override: Force repair columns visible on service views
+                if (isServiceView) {
+                    this.columns.repair_order.visible = true;
+                    this.columns.repair_jo_date.visible = true;
+                    this.columns.repair_service_type.visible = true;
+                    this.columns.repair_vendor.visible = true;
+                    this.columns.repair_odometer.visible = true;
+                    this.columns.repair_est_end.visible = true;
+                    this.columns.repair_history.visible = true;
                 }
 
                 // Save columns on change
@@ -370,8 +545,6 @@
                 window.addEventListener('mouseup', () => {
                     this.resizingCol = null;
                     document.body.style.cursor = 'default';
-                    // Trigger save explicitly after resize ends (mouse up) to ensure final width is saved? 
-                    // $watch should catch it as width updates in real-time.
                 });
             },
 
@@ -459,6 +632,29 @@
                 } else {
                     this.sortCol = col;
                     this.sortAsc = true;
+                }
+            },
+
+            async openRepairHistory(lotNumber) {
+                this.repairHistoryModal.open = true;
+                this.repairHistoryModal.lotNumber = lotNumber;
+                this.repairHistoryModal.loading = true;
+                this.repairHistoryModal.error = null;
+                this.repairHistoryModal.data = [];
+                
+                try {
+                    const response = await fetch(`/api/repair-history/${encodeURIComponent(lotNumber)}`);
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.repairHistoryModal.data = result.data;
+                    } else {
+                        this.repairHistoryModal.error = result.message || 'Failed to fetch repair history';
+                    }
+                } catch (e) {
+                    this.repairHistoryModal.error = 'Network error: ' + e.message;
+                } finally {
+                    this.repairHistoryModal.loading = false;
                 }
             }
         }

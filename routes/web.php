@@ -35,3 +35,6 @@ Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
 Route::post('/settings/targets', [SettingsController::class, 'updateTargets'])->name('settings.targets');
 Route::post('/settings/odoo', [SettingsController::class, 'updateOdoo'])->name('settings.odoo');
 Route::get('/api/settings/targets', [SettingsController::class, 'getTargets'])->name('api.settings.targets');
+
+// Repair History API
+Route::get('/api/repair-history/{lotNumber}', [DashboardController::class, 'repairHistory'])->name('api.repair.history');
