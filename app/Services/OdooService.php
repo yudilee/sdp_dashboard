@@ -137,12 +137,14 @@ class OdooService
             'rental_id/partner_id/display_name',           // 10: Rental ID/Customer
             'rental_id/order_line/reserved_lot_ids/name',  // 11: Reserved Lot (actual lot number!)
             'vehicle_year',                                // 12: Year
+            'ref',                                         // 13: Internal Reference (No Rangka / Chassis)
         ];
 
         // Header row matching Excel format for SummaryGenerator
         $headerRow = [
             'Product',
             'Lot/Serial Number',
+            'Internal Reference',     // NEW: No Rangka / chassis number
             'Location',
             'On Hand Quantity',
             'Is Vendor Rent',
@@ -210,6 +212,7 @@ class OdooService
             $processedRow = [
                 $row[0] ?? '',       // Product
                 $lotNumber,          // Lot/Serial Number
+                $row[13] ?? '',      // Internal Reference (No Rangka)
                 $location,           // Location
                 $row[3] ?? 1,        // On Hand Quantity
                 ($row[4] ?? false) ? 'Ya' : '', // Is Vendor Rent

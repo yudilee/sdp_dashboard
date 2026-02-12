@@ -176,15 +176,15 @@ class DashboardController extends Controller
         $searchQuery = $request->query('q');
         
         $query = $this->buildFilterQuery($inventory, $category, $sub, $searchQuery);
-        $query = $this->buildFilterQuery($inventory, $category, $sub, $searchQuery);
         $items = $query->limit(5000)->get();
         
         // Filter Options Data
         $locations = Item::select('location')->distinct()->orderBy('location')->pluck('location');
         $roles = ['Main', 'Replacement']; // Hardcoded enum-like values
         $types = Item::whereNotNull('rental_type')->where('rental_type', '!=', '')->select('rental_type')->distinct()->pluck('rental_type');
+        $years = Item::whereNotNull('year')->where('year', '!=', '')->select('year')->distinct()->orderByDesc('year')->pluck('year');
 
-        return view('details', compact('items', 'category', 'sub', 'locations', 'roles', 'types'));
+        return view('details', compact('items', 'category', 'sub', 'locations', 'roles', 'types', 'years'));
     }
 
     public function export(Request $request, InventoryService $inventory)

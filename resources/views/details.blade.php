@@ -170,6 +170,14 @@
                 <option value="{{ $type }}">{{ $type }}</option>
                 @endforeach
             </select>
+
+            <!-- Year Filter -->
+            <select x-model="filters.year" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 transition-colors">
+                <option value="">All Years</option>
+                @foreach($years as $yr)
+                <option value="{{ $yr }}">{{ $yr }}</option>
+                @endforeach
+            </select>
             
             <button @click="resetFilters()" x-show="hasActiveFilters" class="px-3 py-1.5 rounded-lg text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors">
                 Reset
@@ -189,6 +197,10 @@
                     <th x-show="columns.product.visible" :style="'width: ' + columns.product.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
                         <div @click="sortBy('product')" class="flex items-center gap-1">Product <span x-show="sortCol === 'product'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                          <div @mousedown="startResize($event, 'product')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
+                    <th x-show="columns.year.visible" :style="'width: ' + columns.year.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                        <div @click="sortBy('year')" class="flex items-center gap-1">Year <span x-show="sortCol === 'year'" x-text="sortAsc ? '↑' : '↓'"></span></div>
+                         <div @mousedown="startResize($event, 'year')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                     </th>
                     <th x-show="columns.location.visible" :style="'width: ' + columns.location.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
                         <div @click="sortBy('location')" class="flex items-center gap-1">Location <span x-show="sortCol === 'location'" x-text="sortAsc ? '↑' : '↓'"></span></div>
@@ -272,8 +284,9 @@
                         <td x-show="columns.lot_number.visible" class="sticky-col p-4 font-mono text-sm font-medium text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-800 dark:group-hover:text-indigo-300 break-words" x-text="item.lot_number"></td>
                         <td x-show="columns.product.visible" class="p-4 break-words">
                             <div class="font-medium text-slate-800 dark:text-slate-200" x-text="item.product"></div>
-                            <div class="text-xs text-slate-400 dark:text-slate-500" x-text="item.internal_reference || 'No Ref'"></div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-mono" x-show="item.internal_reference && item.internal_reference !== 'No Ref'" x-text="item.internal_reference"></div>
                         </td>
+                        <td x-show="columns.year.visible" class="p-4 text-center text-sm font-medium text-slate-600 dark:text-slate-400" x-text="item.year || '-'"></td>
                         <td x-show="columns.location.visible" class="p-4 break-words">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200" x-text="item.location"></span>
                         </td>
@@ -451,7 +464,8 @@
             filters: {
                 location: '',
                 role: '',
-                type: ''
+                type: '',
+                year: ''
             },
             sortCol: 'product',
             sortAsc: true,
@@ -462,6 +476,7 @@
             columns: {
                 lot_number: { label: 'Lot Number', visible: true, width: 150 },
                 product: { label: 'Product', visible: true, width: 250 },
+                year: { label: 'Year', visible: true, width: 70 },
                 location: { label: 'Location', visible: true, width: 140 },
                 qty: { label: 'Qty', visible: true, width: 60 },
                 type: { label: 'Type', visible: true, width: 80 },
@@ -563,13 +578,14 @@
             },
             
             get hasActiveFilters() {
-                return this.filters.location || this.filters.role || this.filters.type;
+                return this.filters.location || this.filters.role || this.filters.type || this.filters.year;
             },
             
             resetFilters() {
                 this.filters.location = '';
                 this.filters.role = '';
                 this.filters.type = '';
+                this.filters.year = '';
                 this.search = '';
             },
 
@@ -583,15 +599,18 @@
                         matchesSearch = (item.lot_number && item.lot_number.toLowerCase().includes(term)) ||
                                         (item.product && item.product.toLowerCase().includes(term)) ||
                                         (item.location && item.location.toLowerCase().includes(term)) ||
-                                        (item.rental_id && item.rental_id.toLowerCase().includes(term));
+                                        (item.rental_id && item.rental_id.toLowerCase().includes(term)) ||
+                                        (item.internal_reference && item.internal_reference.toLowerCase().includes(term)) ||
+                                        (item.year && String(item.year).includes(term));
                     }
                     
                     // Specific Filters
                     let matchesLoc = !this.filters.location || (item.location === this.filters.location);
                     let matchesRole = !this.filters.role || (item.vehicle_role === this.filters.role);
                     let matchesType = !this.filters.type || (item.rental_type === this.filters.type);
+                    let matchesYear = !this.filters.year || (String(item.year) === this.filters.year);
 
-                    return matchesSearch && matchesLoc && matchesRole && matchesType;
+                    return matchesSearch && matchesLoc && matchesRole && matchesType && matchesYear;
                 });
                 
                 // Sorting

@@ -178,6 +178,8 @@ class SummaryGenerator
             'last_customer' => $colMap['Partner/Cust.'] ?? -1, // NEW
             'current_customer' => $colMap['Rental ID/Customer'] ?? -1, // NEW
             'warehouse' => $colMap['Rental ID/Warehouse'] ?? -1, // NEW
+            'internal_reference' => $colMap['Internal Reference'] ?? -1, // No Rangka
+            'year' => $colMap['Year'] ?? -1,
         ];
         
         // Pre-compute rental_id occurrence counts
@@ -460,8 +462,8 @@ class SummaryGenerator
             $items[] = [
                 'product' => $row[0] ?? '',
                 'lot_number' => $lotNo,
-                'internal_reference' => $row[2] ?? '',
-                'year' => $row[3] ?? '',
+                'internal_reference' => $getValue('internal_reference') ?? '',
+                'year' => $getValue('year') ?? '',
                 'location' => $location,
                 'on_hand_quantity' => $qty,
                 'is_vendor_rent' => $isVendorRent,
