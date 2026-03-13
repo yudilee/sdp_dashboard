@@ -247,6 +247,10 @@
                         Stock
                         <div @mousedown="startResize($event, 'in_stock')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                     </th>
+                    <th x-show="columns.purchase_date.visible" :style="'width: ' + columns.purchase_date.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
+                        Purc. Date
+                        <div @mousedown="startResize($event, 'purchase_date')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
                     <!-- Repair Order Columns -->
                     <th x-show="columns.repair_order.visible" :style="'width: ' + columns.repair_order.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left select-none group">
                         Repair Order
@@ -334,6 +338,7 @@
                         <td x-show="columns.in_stock.visible" class="p-4 text-center">
                             <span class="w-2 h-2 inline-block rounded-full" :class="item.in_stock ? 'bg-green-500' : 'bg-red-400 dark:bg-red-500'"></span>
                         </td>
+                        <td x-show="columns.purchase_date.visible" class="p-4 text-center text-xs text-slate-500 dark:text-slate-400" x-text="formatDate(item.purchase_date)"></td>
                         <!-- Repair Order Data -->
                         <td x-show="columns.repair_order.visible" class="p-4 text-xs">
                             <span x-show="item.repair_order_name" class="font-mono font-medium text-orange-600 dark:text-orange-400" x-text="item.repair_order_name"></span>
@@ -488,6 +493,7 @@
                 vehicle_role: { label: 'Role', visible: false, width: 80 },
                 linked: { label: 'Linked', visible: false, width: 100 },
                 in_stock: { label: 'Stock', visible: false, width: 60 },
+                purchase_date: { label: 'Purc. Date', visible: false, width: 100 },
                 repair_order: { label: 'Repair Order', visible: false, width: 160 },
                 repair_jo_date: { label: 'JO Date', visible: false, width: 100 },
                 repair_service_type: { label: 'Service Type', visible: false, width: 100 },

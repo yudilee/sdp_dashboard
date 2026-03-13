@@ -155,9 +155,13 @@
                                             <span class="text-slate-400 dark:text-slate-500 block text-[10px] uppercase font-bold">Internal Ref</span>
                                             <span class="text-slate-600 dark:text-slate-300" x-text="pair.main_vehicle.internal_reference"></span>
                                         </div>
-                                        <div class="col-span-2">
+                                        <div>
                                             <span class="text-slate-400 dark:text-slate-500 block text-[10px] uppercase font-bold">Location</span>
                                             <span class="text-slate-600 dark:text-slate-300" x-text="pair.main_vehicle.location"></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400 dark:text-slate-500 block text-[10px] uppercase font-bold">Purc. Date</span>
+                                            <span class="text-slate-600 dark:text-slate-300" x-text="pair.main_vehicle.purchase_date ? pair.main_vehicle.purchase_date.substring(0, 10) : '-'"></span>
                                         </div>
                                     </div>
                                     <div class="mt-3 pt-3 border-t border-slate-50 dark:border-slate-800 flex justify-between items-center">
@@ -191,9 +195,13 @@
                                         <span class="text-slate-400 dark:text-slate-500 block text-[10px] uppercase font-bold">Internal Ref</span>
                                         <span class="text-slate-600 dark:text-slate-300" x-text="repl.internal_reference"></span>
                                     </div>
-                                    <div class="col-span-2">
+                                    <div>
                                         <span class="text-slate-400 dark:text-slate-500 block text-[10px] uppercase font-bold">Location</span>
                                         <span class="text-slate-600 dark:text-slate-300" x-text="repl.location"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 dark:text-slate-500 block text-[10px] uppercase font-bold">Purc. Date</span>
+                                        <span class="text-slate-600 dark:text-slate-300" x-text="repl.purchase_date ? repl.purchase_date.substring(0, 10) : '-'"></span>
                                     </div>
                                 </div>
                             </div>

@@ -24,6 +24,7 @@ class Item extends Model
         'repair_schedule_date' => 'date',
         'repair_estimation_end' => 'date',
         'repair_odometer' => 'integer',
+        'purchase_date' => 'date',
     ];
 
     // Scopes for common queries

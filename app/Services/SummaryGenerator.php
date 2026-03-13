@@ -180,6 +180,7 @@ class SummaryGenerator
             'warehouse' => $colMap['Rental ID/Warehouse'] ?? -1, // NEW
             'internal_reference' => $colMap['Internal Reference'] ?? -1, // No Rangka
             'year' => $colMap['Year'] ?? -1,
+            'purchase_date' => $colMap['Purchase Date'] ?? -1,
         ];
         
         // Pre-compute rental_id occurrence counts
@@ -464,6 +465,7 @@ class SummaryGenerator
                 'lot_number' => $lotNo,
                 'internal_reference' => $getValue('internal_reference') ?? '',
                 'year' => $getValue('year') ?? '',
+                'purchase_date' => $this->excelDateToCarbon($getValue('purchase_date')),
                 'location' => $location,
                 'on_hand_quantity' => $qty,
                 'is_vendor_rent' => $isVendorRent,
@@ -568,6 +570,7 @@ class SummaryGenerator
                     'lot_number' => $item['lot_number'],
                     'internal_reference' => $item['internal_reference'],
                     'year' => $item['year'],
+                    'purchase_date' => $item['purchase_date'],
                     'location' => $item['location'],
                     'on_hand_quantity' => $item['on_hand_quantity'],
                     'is_vendor_rent' => $item['is_vendor_rent'],

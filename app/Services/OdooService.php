@@ -27,6 +27,7 @@ class OdooService
         'is_vendor_rent' => ['x_is_vendor_rent', 'x_vendor_rent', 'is_vendor', 'x_sewa_vendor'],
         'reserved_lot' => ['x_reserved_lot', 'x_original_lot', 'reserved_lot'],
         'year' => ['x_year', 'year', 'x_tahun', 'manufacture_year'],
+        'purchase_date' => ['purchase_date', 'x_purchase_date', 'tanggal_pembelian'],
         'km_last' => ['x_km', 'x_km_last', 'odometer', 'x_odometer'],
         'on_hand_quantity' => ['quantity', 'qty', 'product_qty', 'qty_available'],
     ];
@@ -138,6 +139,7 @@ class OdooService
             'rental_id/order_line/reserved_lot_ids/name',  // 11: Reserved Lot (actual lot number!)
             'vehicle_year',                                // 12: Year
             'ref',                                         // 13: Internal Reference (No Rangka / Chassis)
+            'purchase_date',                               // 14: Purchase Date
         ];
 
         // Header row matching Excel format for SummaryGenerator
@@ -157,6 +159,7 @@ class OdooService
             'Rental ID/Customer',
             'Rental ID/Order Lines/Reserved Lot', // Derived from original_reserved
             'Year',
+            'Purchase Date',
         ];
 
         // Get all IDs matching domain (same as Excel export filter)
@@ -225,6 +228,7 @@ class OdooService
                 $row[10] ?? '',      // Rental ID/Customer
                 $reservedLot,        // Reserved Lot (directly from Odoo field)
                 $row[12] ?? '',      // Year
+                $row[14] ?? null,    // Purchase Date
             ];
             
             $data[] = $processedRow;
@@ -560,6 +564,7 @@ class OdooService
                 'actual_end_rental' => $this->parseDate($this->extractValue($record, $mapping, 'actual_end_rental')),
                 'reserved_lot' => $this->extractValue($record, $mapping, 'reserved_lot'),
                 'year' => $this->extractValue($record, $mapping, 'year'),
+                'purchase_date' => $this->parseDate($this->extractValue($record, $mapping, 'purchase_date')),
                 'km_last' => $this->extractValue($record, $mapping, 'km_last'),
                 'is_vendor_rent' => $this->parseBool($this->extractValue($record, $mapping, 'is_vendor_rent')),
             ];
