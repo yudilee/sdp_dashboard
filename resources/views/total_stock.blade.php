@@ -482,73 +482,73 @@
                                 <div @click="sortBy('location')" class="flex items-center gap-1">Location <span x-show="sortCol === 'location'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'location')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.on_hand_quantity.visible" :style="'width: ' + columns.on_hand_quantity.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Qty
+                            <th x-show="columns.on_hand_quantity.visible" :style="'width: ' + columns.on_hand_quantity.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('on_hand_quantity')" class="flex items-center justify-center gap-1">Qty <span x-show="sortCol === 'on_hand_quantity'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'on_hand_quantity')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.rental_type.visible" :style="'width: ' + columns.rental_type.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Type
+                            <th x-show="columns.rental_type.visible" :style="'width: ' + columns.rental_type.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('is_vendor_rent')" class="flex items-center justify-center gap-1">Type <span x-show="sortCol === 'is_vendor_rent'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'rental_type')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.current_customer.visible" :style="'width: ' + columns.current_customer.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left select-none group">
-                                Customer
+                            <th x-show="columns.current_customer.visible" :style="'width: ' + columns.current_customer.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('current_customer')" class="flex items-center gap-1">Customer <span x-show="sortCol === 'current_customer'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'current_customer')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.warehouse.visible" :style="'width: ' + columns.warehouse.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left select-none group">
-                                Warehouse
+                            <th x-show="columns.warehouse.visible" :style="'width: ' + columns.warehouse.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('warehouse')" class="flex items-center gap-1">Warehouse <span x-show="sortCol === 'warehouse'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'warehouse')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.status.visible" :style="'width: ' + columns.status.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Rental Status
+                            <th x-show="columns.status.visible" :style="'width: ' + columns.status.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('rental_id')" class="flex items-center justify-center gap-1">Rental Status <span x-show="sortCol === 'rental_id'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'status')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.actual_start_rental.visible" :style="'width: ' + columns.actual_start_rental.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Start
+                            <th x-show="columns.actual_start_rental.visible" :style="'width: ' + columns.actual_start_rental.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('actual_start_rental')" class="flex items-center justify-center gap-1">Start <span x-show="sortCol === 'actual_start_rental'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'actual_start_rental')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.actual_end_rental.visible" :style="'width: ' + columns.actual_end_rental.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                End
+                            <th x-show="columns.actual_end_rental.visible" :style="'width: ' + columns.actual_end_rental.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('actual_end_rental')" class="flex items-center justify-center gap-1">End <span x-show="sortCol === 'actual_end_rental'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'actual_end_rental')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.vehicle_role.visible" :style="'width: ' + columns.vehicle_role.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Role
+                            <th x-show="columns.vehicle_role.visible" :style="'width: ' + columns.vehicle_role.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('vehicle_role')" class="flex items-center justify-center gap-1">Role <span x-show="sortCol === 'vehicle_role'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'vehicle_role')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.linked_vehicle.visible" :style="'width: ' + columns.linked_vehicle.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Linked
+                            <th x-show="columns.linked_vehicle.visible" :style="'width: ' + columns.linked_vehicle.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('linked_vehicle')" class="flex items-center justify-center gap-1">Linked <span x-show="sortCol === 'linked_vehicle'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'linked_vehicle')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.in_stock.visible" :style="'width: ' + columns.in_stock.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Stock
+                            <th x-show="columns.in_stock.visible" :style="'width: ' + columns.in_stock.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('in_stock')" class="flex items-center justify-center gap-1">Stock <span x-show="sortCol === 'in_stock'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'in_stock')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.purchase_date.visible" :style="'width: ' + columns.purchase_date.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Purc. Date
+                            <th x-show="columns.purchase_date.visible" :style="'width: ' + columns.purchase_date.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('purchase_date')" class="flex items-center justify-center gap-1">Purc. Date <span x-show="sortCol === 'purchase_date'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'purchase_date')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
                             <!-- Repair Order Columns -->
-                            <th x-show="columns.repair_order.visible" :style="'width: ' + columns.repair_order.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left select-none group">
-                                Repair Order
+                            <th x-show="columns.repair_order.visible" :style="'width: ' + columns.repair_order.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('repair_order_name')" class="flex items-center gap-1">Repair Order <span x-show="sortCol === 'repair_order_name'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'repair_order')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.repair_jo_date.visible" :style="'width: ' + columns.repair_jo_date.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                JO Date
+                            <th x-show="columns.repair_jo_date.visible" :style="'width: ' + columns.repair_jo_date.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('repair_schedule_date')" class="flex items-center justify-center gap-1">JO Date <span x-show="sortCol === 'repair_schedule_date'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'repair_jo_date')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.repair_service_type.visible" :style="'width: ' + columns.repair_service_type.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Service Type
+                            <th x-show="columns.repair_service_type.visible" :style="'width: ' + columns.repair_service_type.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('repair_service_type')" class="flex items-center justify-center gap-1">Service Type <span x-show="sortCol === 'repair_service_type'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'repair_service_type')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.repair_vendor.visible" :style="'width: ' + columns.repair_vendor.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left select-none group">
-                                Vendor
+                            <th x-show="columns.repair_vendor.visible" :style="'width: ' + columns.repair_vendor.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('repair_vendor')" class="flex items-center gap-1">Vendor <span x-show="sortCol === 'repair_vendor'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'repair_vendor')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.repair_odometer.visible" :style="'width: ' + columns.repair_odometer.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Odometer
+                            <th x-show="columns.repair_odometer.visible" :style="'width: ' + columns.repair_odometer.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('repair_odometer')" class="flex items-center justify-center gap-1">Odometer <span x-show="sortCol === 'repair_odometer'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'repair_odometer')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
-                            <th x-show="columns.repair_est_end.visible" :style="'width: ' + columns.repair_est_end.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
-                                Est. End
+                            <th x-show="columns.repair_est_end.visible" :style="'width: ' + columns.repair_est_end.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                                <div @click="sortBy('repair_estimation_end')" class="flex items-center justify-center gap-1">Est. End <span x-show="sortCol === 'repair_estimation_end'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                                 <div @mousedown="startResize($event, 'repair_est_end')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                             </th>
                             <th x-show="columns.repair_history.visible" :style="'width: ' + columns.repair_history.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-center select-none group">
