@@ -367,7 +367,8 @@ class OdooService
 
     /**
      * Fetch traceability report for a specific lot number.
-     * Queries stock.move.line to get all stock moves for the lot.
+     * Queries stock.move.line to get all stock moves for the lot,
+     * matching the Odoo native traceability report columns.
      *
      * @param string $lotNumber
      * @return array ['success' => bool, 'data' => [...]]
@@ -386,33 +387,96 @@ class OdooService
 
             $lotId = $lotIds[0];
 
-            // 2. Search all stock.move.line for this lot (completed moves)
+            // 2. Search all stock.move.line for this lot (done + assigned/ready)
             $moveLineIds = $this->execute('stock.move.line', 'search', [
-                [['lot_id', '=', $lotId], ['state', '=', 'done']]
+                [['lot_id', '=', $lotId], ['state', 'in', ['done', 'assigned', 'confirmed', 'partially_available']]]
             ], ['order' => 'date desc']);
 
             if (empty($moveLineIds)) {
                 return ['success' => true, 'data' => []];
             }
 
+            // 3. Read move line fields
             $fields = [
-                'reference', 'product_id', 'date', 'lot_id',
-                'location_id', 'location_dest_id', 'quantity',
-                'product_uom_id',
+                'reference', 'location_id', 'location_dest_id',
+                'picking_partner_id', 'date', 'lot_id',
+                'origin', 'state', 'move_id',
             ];
 
             $moveLines = $this->execute('stock.move.line', 'read', [$moveLineIds, $fields]);
 
+            // 4. Collect unique move IDs to fetch scheduled dates & reserved lots
+            $moveIds = [];
+            foreach ($moveLines as $line) {
+                if (!empty($line['move_id'])) {
+                    $moveId = is_array($line['move_id']) ? $line['move_id'][0] : $line['move_id'];
+                    $moveIds[$moveId] = true;
+                }
+            }
+
+            // 5. Fetch stock.move data for scheduled dates and reserved lot info
+            $moveData = [];
+            if (!empty($moveIds)) {
+                $moveIds = array_keys($moveIds);
+                try {
+                    $moves = $this->execute('stock.move', 'read', [
+                        $moveIds, ['date_deadline', 'date', 'restrict_lot_id', 'lot_ids']
+                    ]);
+                    foreach ($moves as $move) {
+                        $moveData[$move['id']] = $move;
+                    }
+                } catch (\Exception $e) {
+                    // Some fields may not exist in all Odoo versions, fallback gracefully
+                    try {
+                        $moves = $this->execute('stock.move', 'read', [
+                            $moveIds, ['date_deadline', 'date']
+                        ]);
+                        foreach ($moves as $move) {
+                            $moveData[$move['id']] = $move;
+                        }
+                    } catch (\Exception $e2) {
+                        // ignore - we'll just skip scheduled date
+                    }
+                }
+            }
+
+            // 6. Build result data matching Odoo traceability report layout
+            $stateLabels = [
+                'draft' => 'Draft',
+                'waiting' => 'Waiting',
+                'confirmed' => 'Waiting',
+                'partially_available' => 'Partially Available',
+                'assigned' => 'Ready',
+                'done' => 'Done',
+                'cancel' => 'Cancelled',
+            ];
+
             $data = [];
             foreach ($moveLines as $line) {
+                $moveId = is_array($line['move_id'] ?? null) ? $line['move_id'][0] : ($line['move_id'] ?? null);
+                $move = $moveData[$moveId] ?? [];
+
+                // Scheduled date from stock.move
+                $scheduledDate = $move['date_deadline'] ?? $move['date'] ?? '';
+
+                // SO Reserved Lot - try restrict_lot_id or lot_ids from move
+                $reservedLot = '';
+                if (!empty($move['restrict_lot_id'])) {
+                    $reservedLot = is_array($move['restrict_lot_id']) ? $move['restrict_lot_id'][1] : '';
+                }
+
                 $data[] = [
                     'reference' => $line['reference'] ?? '',
-                    'product' => is_array($line['product_id']) ? $line['product_id'][1] : ($line['product_id'] ?? ''),
-                    'date' => $line['date'] ?? '',
-                    'lot_serial' => is_array($line['lot_id']) ? $line['lot_id'][1] : ($line['lot_id'] ?? ''),
                     'from' => is_array($line['location_id']) ? $line['location_id'][1] : ($line['location_id'] ?? ''),
                     'to' => is_array($line['location_dest_id']) ? $line['location_dest_id'][1] : ($line['location_dest_id'] ?? ''),
-                    'quantity' => ($line['quantity'] ?? 0) . ' ' . (is_array($line['product_uom_id']) ? $line['product_uom_id'][1] : 'Units'),
+                    'contact' => is_array($line['picking_partner_id'] ?? null) ? $line['picking_partner_id'][1] : '',
+                    'scheduled_date' => $scheduledDate,
+                    'lots' => is_array($line['lot_id']) ? $line['lot_id'][1] : ($line['lot_id'] ?? ''),
+                    'effective_date' => $line['date'] ?? '',
+                    'source_document' => $line['origin'] ?? '',
+                    'so_reserved_lot' => $reservedLot ?: (is_array($line['lot_id']) ? $line['lot_id'][1] : ''),
+                    'state' => $line['state'] ?? '',
+                    'state_label' => $stateLabels[$line['state'] ?? ''] ?? ucfirst($line['state'] ?? ''),
                 ];
             }
 

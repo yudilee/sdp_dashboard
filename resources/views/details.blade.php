@@ -470,7 +470,7 @@
     <!-- Traceability Report Modal -->
     <div x-show="traceabilityModal.open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.escape.window="traceabilityModal.open = false">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="traceabilityModal.open = false"></div>
-        <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-5xl max-h-[85vh] flex flex-col">
+        <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-7xl max-h-[85vh] flex flex-col">
             <!-- Header -->
             <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
@@ -505,16 +505,20 @@
                     <div class="mb-3 text-xs text-slate-400 dark:text-slate-500">
                         <span x-text="traceabilityModal.data.length"></span> move(s) found
                     </div>
-                    <table class="w-full text-left text-sm">
+                    <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm min-w-[1100px]">
                         <thead class="bg-slate-50 dark:bg-slate-800 text-xs uppercase text-slate-500 dark:text-slate-400">
                             <tr>
                                 <th class="p-3 rounded-tl-lg">Reference</th>
-                                <th class="p-3">Product</th>
-                                <th class="p-3">Date</th>
-                                <th class="p-3">Lot/Serial #</th>
                                 <th class="p-3">From</th>
                                 <th class="p-3">To</th>
-                                <th class="p-3 rounded-tr-lg text-right">Quantity</th>
+                                <th class="p-3">Contact</th>
+                                <th class="p-3">Scheduled Date</th>
+                                <th class="p-3">Lots</th>
+                                <th class="p-3">Effective Date</th>
+                                <th class="p-3">Source Document</th>
+                                <th class="p-3">SO Reserved Lot</th>
+                                <th class="p-3 rounded-tr-lg text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -523,18 +527,31 @@
                                     <td class="p-3 font-mono text-xs">
                                         <span class="font-medium text-teal-600 dark:text-teal-400" x-text="m.reference"></span>
                                     </td>
-                                    <td class="p-3 text-xs text-slate-700 dark:text-slate-300" x-text="m.product"></td>
-                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="m.date ? m.date.substring(0, 19) : '-'"></td>
-                                    <td class="p-3">
-                                        <span class="font-mono text-xs font-medium text-indigo-600 dark:text-indigo-400" x-text="m.lot_serial"></span>
-                                    </td>
                                     <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="m.from || '-'"></td>
                                     <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="m.to || '-'"></td>
-                                    <td class="p-3 text-xs text-right font-medium text-slate-700 dark:text-slate-300" x-text="m.quantity"></td>
+                                    <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="m.contact || '-'"></td>
+                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="m.scheduled_date ? m.scheduled_date.substring(0, 10) : '-'"></td>
+                                    <td class="p-3">
+                                        <span class="font-mono text-xs font-medium text-indigo-600 dark:text-indigo-400" x-text="m.lots"></span>
+                                    </td>
+                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="m.effective_date ? m.effective_date.substring(0, 19) : '-'"></td>
+                                    <td class="p-3 text-xs">
+                                        <span class="font-mono font-medium text-slate-700 dark:text-slate-300" x-text="m.source_document || '-'"></span>
+                                    </td>
+                                    <td class="p-3 text-xs font-mono text-slate-600 dark:text-slate-400" x-text="m.so_reserved_lot || '-'"></td>
+                                    <td class="p-3 text-center">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold" :class="{
+                                            'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400': m.state === 'done',
+                                            'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400': m.state === 'assigned',
+                                            'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400': m.state === 'confirmed' || m.state === 'partially_available',
+                                            'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300': m.state !== 'done' && m.state !== 'assigned' && m.state !== 'confirmed' && m.state !== 'partially_available'
+                                        }" x-text="m.state_label"></span>
+                                    </td>
                                 </tr>
                             </template>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
