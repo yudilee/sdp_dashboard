@@ -168,8 +168,12 @@
 
     formatDate(dateStr) {
         if (!dateStr) return 'Never';
-        const date = new Date(dateStr);
-        return date.toLocaleString();
+        const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        return d.getDate() + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear() + ' ' + hh + ':' + mm;
     },
 
     async loadHistory() {

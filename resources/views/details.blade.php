@@ -468,11 +468,15 @@
     </div>
 
     <!-- Traceability Report Modal -->
-    <div x-show="traceabilityModal.open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.escape.window="traceabilityModal.open = false">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="traceabilityModal.open = false"></div>
-        <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-7xl max-h-[85vh] flex flex-col">
-            <!-- Header -->
-            <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+    <div x-show="traceabilityModal.open" x-cloak 
+         x-effect="if (traceabilityModal.open) { document.body.style.overflow = 'hidden'; } else { document.body.style.overflow = ''; }"
+         class="fixed inset-0 z-50 p-4 flex items-center justify-center bg-black/60 backdrop-blur-sm" @keydown.escape.window="traceabilityModal.open = false">
+        
+        <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-7xl flex flex-col overflow-hidden" 
+             style="max-height: 90vh;">
+            
+            <!-- Header (always fixed) -->
+            <div class="flex-shrink-0 p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                         📋 Traceability Report
@@ -485,8 +489,9 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- Body -->
-            <div class="flex-1 overflow-auto p-5 custom-scrollbar">
+            
+            <!-- Body (scrollable portion) -->
+            <div class="flex-1 overflow-y-auto p-5 custom-scrollbar bg-white dark:bg-slate-900">
                 <!-- Loading -->
                 <div x-show="traceabilityModal.loading" class="flex items-center justify-center py-12">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
@@ -530,11 +535,11 @@
                                     <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="m.from || '-'"></td>
                                     <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="m.to || '-'"></td>
                                     <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="m.contact || '-'"></td>
-                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="m.scheduled_date ? m.scheduled_date.substring(0, 10) : '-'"></td>
+                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="formatTraceDate(m.scheduled_date)"></td>
                                     <td class="p-3">
                                         <span class="font-mono text-xs font-medium text-indigo-600 dark:text-indigo-400" x-text="m.lots"></span>
                                     </td>
-                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="m.effective_date ? m.effective_date.substring(0, 19) : '-'"></td>
+                                    <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="formatTraceDateTime(m.effective_date)"></td>
                                     <td class="p-3 text-xs">
                                         <span class="font-mono font-medium text-slate-700 dark:text-slate-300" x-text="m.source_document || '-'"></span>
                                     </td>
@@ -561,7 +566,7 @@
                         <div class="px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 mb-3">
                             <div class="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-300">
                                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                                <span x-text="group.header"></span>
+                                <span x-text="'Rental Order : ' + group.rental_order + ' Original ' + group.original_lot + ' replaced by ' + group.replacement_lot + ' at ' + group.replacement_date_formatted"></span>
                             </div>
                         </div>
                         <!-- Replacement Moves Table -->
@@ -590,11 +595,11 @@
                                         <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="m.from || '-'"></td>
                                         <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="m.to || '-'"></td>
                                         <td class="p-3 text-xs text-slate-600 dark:text-slate-400" x-text="m.contact || '-'"></td>
-                                        <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="m.scheduled_date ? m.scheduled_date.substring(0, 10) : '-'"></td>
+                                        <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="formatTraceDate(m.scheduled_date)"></td>
                                         <td class="p-3">
                                             <span class="font-mono text-xs font-medium text-indigo-600 dark:text-indigo-400" x-text="m.lots"></span>
                                         </td>
-                                        <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="m.effective_date ? m.effective_date.substring(0, 19) : '-'"></td>
+                                        <td class="p-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap" x-text="formatTraceDateTime(m.effective_date)"></td>
                                         <td class="p-3 text-xs">
                                             <span class="font-mono font-medium text-slate-700 dark:text-slate-300" x-text="m.source_document || '-'"></span>
                                         </td>
@@ -746,8 +751,30 @@
 
             formatDate(dateStr) {
                 if (!dateStr) return '-';
-                // Simple date format
-                return dateStr.substring(0, 10);
+                const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr.substring(0, 10);
+                return d.getDate() + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
+            },
+
+            formatDateTime(dateStr) {
+                if (!dateStr) return '-';
+                const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr.substring(0, 19);
+                const hh = String(d.getHours()).padStart(2, '0');
+                const mm = String(d.getMinutes()).padStart(2, '0');
+                return d.getDate() + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear() + ' ' + hh + ':' + mm;
+            },
+
+            formatTraceDate(dateStr) {
+                if (!dateStr || dateStr === false) return '-';
+                return this.formatDate(dateStr);
+            },
+
+            formatTraceDateTime(dateStr) {
+                if (!dateStr || dateStr === false) return '-';
+                return this.formatDateTime(dateStr);
             },
 
             startResize(e, colId) {

@@ -590,6 +590,13 @@ class OdooService
                             // Build moves array
                             $relMovesData = [];
                             foreach ($relatedMoveLines as $rl) {
+                                // Filter: Only show SDJKT/ references (Stock Pickings) for the replacement history
+                                // This excludes Maintenance Orders (JO-) which clutter the replacement view
+                                $ref = $rl['reference'] ?? '';
+                                if (!str_starts_with($ref, 'SDJKT/')) {
+                                    continue;
+                                }
+
                                 $rmId = is_array($rl['move_id'] ?? null) ? $rl['move_id'][0] : ($rl['move_id'] ?? null);
                                 $rmData = $relMoveData[$rmId] ?? [];
                                 $schDate = $rmData['date_deadline'] ?? $rmData['date'] ?? '';
@@ -620,14 +627,16 @@ class OdooService
                                     $replacementDate = $rm['effective_date'];
                                 }
                             }
-                            $replaceDateFormatted = $replacementDate ? date('d/m/Y', strtotime($replacementDate)) : '';
+                            $months = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                            $d = $replacementDate ? strtotime($replacementDate) : null;
+                            $replacementDateFormatted = $d ? date('j', $d) . ' ' . $months[(int)date('n', $d)] . ' ' . date('Y', $d) : '-';
 
                             $relatedGroups[] = [
-                                'header' => "Rental Order : {$rentalOrder}  Original {$lotNumber}  replaced by {$relLotName} at {$replaceDateFormatted}",
                                 'rental_order' => $rentalOrder,
                                 'original_lot' => $lotNumber,
                                 'replacement_lot' => $relLotName,
-                                'replacement_date' => $replaceDateFormatted,
+                                'replacement_date' => $replacementDate,
+                                'replacement_date_formatted' => $replacementDateFormatted,
                                 'moves' => $relMovesData,
                             ];
                         }
