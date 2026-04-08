@@ -83,6 +83,7 @@ class SummaryGenerator
                         'Cilegon' => 0,
                         'in Transit' => 0,
                         'Daerah Lain2' => 0,
+                        'SDP/LOST' => 0,
                     ]
                 ]
             ],
@@ -368,14 +369,19 @@ class SummaryGenerator
                 if (stripos($location, 'Operation') !== false) {
                      $summary['in_stock']['details'][Location::OPERATION]['count'] += $qty; 
                 } else {
-                     $loc = $location; 
-                     if (!isset($summary['in_stock']['details']['locations'])) {
-                         $summary['in_stock']['details']['locations'] = [];
-                     }
-                     if (!isset($summary['in_stock']['details']['locations'][$loc])) {
-                         $summary['in_stock']['details']['locations'][$loc] = 0;
-                     }
-                     $summary['in_stock']['details']['locations'][$loc] += $qty;
+                     $loc = $location;                      if (!isset($summary['in_stock']['details']['locations'])) {
+                          $summary['in_stock']['details']['locations'] = [];
+                      }
+                      
+                      // Ensure LOST location always exists in details for the dashboard
+                      if (!isset($summary['in_stock']['details']['locations']['SDP/LOST'])) {
+                          $summary['in_stock']['details']['locations']['SDP/LOST'] = 0;
+                      }
+
+                      if (!isset($summary['in_stock']['details']['locations'][$loc])) {
+                          $summary['in_stock']['details']['locations'][$loc] = 0;
+                      }
+                      $summary['in_stock']['details']['locations'][$loc] += $qty;
                 }
             }
             

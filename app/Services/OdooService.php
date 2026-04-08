@@ -209,7 +209,8 @@ class OdooService
             $inStock = (
                 stripos($location, 'STOCK') !== false ||
                 stripos($location, 'TRANSIT') !== false ||
-                stripos($location, 'OPERATION') !== false
+                stripos($location, 'OPERATION') !== false ||
+                stripos($location, 'LOST') !== false
             ) ? '1' : '';
 
             $processedRow = [
@@ -1230,5 +1231,62 @@ class OdooService
         }
         
         return $response;
+    }
+    /**
+     * Fetch movement history for a specific location.
+     */
+    public function fetchLocationHistory(string $locationName): array
+    {
+        // 1. Find the location ID by name
+        $locationIds = $this->execute('stock.location', 'search', [[['complete_name', '=', $locationName]]]);
+        if (empty($locationIds)) {
+            return [
+                'success' => false,
+                'message' => "Location '$locationName' not found in Odoo.",
+                'data' => []
+            ];
+        }
+        
+        $locationId = $locationIds[0];
+        
+        // 2. Search for move lines entering or leaving this location
+        $moveIds = $this->execute('stock.move.line', 'search', [
+            [
+                '|',
+                ['location_id', '=', $locationId],
+                ['location_dest_id', '=', $locationId],
+                ['state', '=', 'done']
+            ]
+        ], ['order' => 'date desc', 'limit' => 50]);
+        
+        if (empty($moveIds)) {
+            return [
+                'success' => true,
+                'message' => 'No movement history found for this location.',
+                'data' => []
+            ];
+        }
+        
+        // 3. Read move data
+        $moves = $this->execute('stock.move.line', 'read', [
+            $moveIds, 
+            ['lot_id', 'product_id', 'date', 'location_id', 'location_dest_id', 'reference']
+        ]);
+        
+        $data = array_map(function($m) {
+            return [
+                'date' => $m['date'],
+                'lot' => is_array($m['lot_id']) ? $m['lot_id'][1] : ($m['lot_id'] ?? '-'),
+                'product' => is_array($m['product_id']) ? $m['product_id'][1] : ($m['product_id'] ?? '-'),
+                'from' => is_array($m['location_id']) ? $m['location_id'][1] : ($m['location_id'] ?? '-'),
+                'to' => is_array($m['location_dest_id']) ? $m['location_dest_id'][1] : ($m['location_dest_id'] ?? '-'),
+                'reference' => $m['reference'] ?? '-'
+            ];
+        }, $moves);
+        
+        return [
+            'success' => true,
+            'data' => $data
+        ];
     }
 }

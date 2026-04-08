@@ -3,7 +3,7 @@
 @section('title', 'Dashboard - SDP Stock')
 
 @section('content')
-    <div>
+    <div x-data="dashboard()">
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -375,16 +375,33 @@
                     </a>
                     @endif
 
-                    @if(isset($summary['in_stock']['details']['locations']))
-                        @foreach($summary['in_stock']['details']['locations'] as $loc => $val)
-                        @if($val > 0 && $loc !== 'SDP/STOCK SOLD')
-                        <a href="{{ route('details', ['category' => 'in_stock', 'sub' => $loc]) }}" class="flex justify-between items-center p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-                            <span class="text-slate-600 dark:text-slate-300 font-medium group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ $loc }}</span>
-                            <span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold px-2 py-1 rounded-md">{{ $val }}</span>
-                        </a>
+                    @php
+                        $locations = $summary['in_stock']['details']['locations'] ?? [];
+                        if (!isset($locations['SDP/LOST'])) {
+                            $locations['SDP/LOST'] = 0;
+                        }
+                    @endphp
+
+                    @foreach($locations as $loc => $val)
+                        @if($loc === 'SDP/LOST' || ($val > 0 && $loc !== 'SDP/STOCK SOLD'))
+                        <div class="flex items-center gap-2 group/loc">
+                            <a href="{{ route('details', ['category' => 'in_stock', 'sub' => $loc]) }}" 
+                               class="flex-grow flex justify-between items-center p-3 rounded-xl border transition-all 
+                                      {{ $loc === 'SDP/LOST' ? 'border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20' : 'border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+                                <span class="{{ $loc === 'SDP/LOST' ? 'text-red-700 dark:text-red-400 font-bold' : 'text-slate-600 dark:text-slate-300 font-medium' }}">{{ $loc }}</span>
+                                <span class="{{ $loc === 'SDP/LOST' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400' }} text-xs font-bold px-2 py-1 rounded-md">{{ $val }}</span>
+                            </a>
+                            
+                            @if($loc === 'SDP/LOST')
+                            <button @click="openLocationHistory('{{ $loc }}')" 
+                                    class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 transition-all shadow-sm"
+                                    title="View Movement History">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </button>
+                            @endif
+                        </div>
                         @endif
-                        @endforeach
-                    @endif
+                    @endforeach
                 </div>
             </div>
 
@@ -664,7 +681,95 @@
 
     
     @endif
+    
+    <!-- Location History Modal -->
+    <div x-show="locationHistoryModal.open" x-cloak 
+         x-effect="if (locationHistoryModal.open) { document.body.style.overflow = 'hidden'; } else { document.body.style.overflow = ''; }"
+         class="fixed inset-0 z-50 p-4 flex items-center justify-center bg-black/60 backdrop-blur-sm" @keydown.escape.window="locationHistoryModal.open = false">
+        
+        <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-5xl flex flex-col overflow-hidden" 
+             style="max-height: 90vh;">
+            
+            <!-- Header -->
+            <div class="flex-shrink-0 p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Movement History
+                    </h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                        Location: <span class="font-bold text-slate-700 dark:text-slate-200" x-text="locationHistoryModal.locationName"></span>
+                    </p>
+                </div>
+                <button @click="locationHistoryModal.open = false" class="p-2 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shadow-sm border border-transparent hover:border-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Body -->
+            <div class="flex-1 overflow-y-auto p-5 custom-scrollbar bg-white dark:bg-slate-910">
+                <!-- Loading -->
+                <div x-show="locationHistoryModal.loading" class="flex flex-col items-center justify-center py-20">
+                    <div class="relative w-16 h-16">
+                        <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+                    </div>
+                    <span class="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">Fetching records from Odoo...</span>
+                </div>
 
+                <!-- Error -->
+                <div x-show="locationHistoryModal.error" class="text-center py-12 px-4 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/30">
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <p class="text-slate-800 dark:text-slate-200 font-bold" x-text="locationHistoryModal.error"></p>
+                    <button @click="openLocationHistory(locationHistoryModal.locationName)" class="mt-4 text-sm text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Try Again</button>
+                </div>
+
+                <!-- Data Table -->
+                <div x-show="!locationHistoryModal.loading && !locationHistoryModal.error">
+                    <template x-if="locationHistoryModal.data.length === 0">
+                        <div class="text-center py-20 bg-slate-50 dark:bg-slate-800/20 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                            <p class="text-slate-400 dark:text-slate-500 font-medium tracking-wide">No recent movement records found.</p>
+                        </div>
+                    </template>
+
+                    <template x-if="locationHistoryModal.data.length > 0">
+                        <div class="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-800">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 dark:bg-slate-800 text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">
+                                    <tr>
+                                        <th class="p-4">Date</th>
+                                        <th class="p-4">Lot/Serial</th>
+                                        <th class="p-4">Product</th>
+                                        <th class="p-4">From</th>
+                                        <th class="p-4">To</th>
+                                        <th class="p-4">Reference</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                    <template x-for="(m, i) in locationHistoryModal.data" :key="i">
+                                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                                            <td class="p-4 whitespace-nowrap text-slate-500 dark:text-slate-400 font-medium" x-text="formatDate(m.date)"></td>
+                                            <td class="p-4 font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400" x-text="m.lot"></td>
+                                            <td class="p-4 text-slate-700 dark:text-slate-300 font-medium" x-text="m.product"></td>
+                                            <td class="p-4 text-xs text-slate-500 dark:text-slate-400" x-text="m.from"></td>
+                                            <td class="p-4 text-xs text-slate-500 dark:text-slate-400" x-text="m.to"></td>
+                                            <td class="p-4 font-mono text-[10px] text-slate-400 dark:text-slate-500" x-text="m.reference"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <!-- Footer -->
+            <div x-show="!locationHistoryModal.loading && locationHistoryModal.data.length > 0" class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/30 text-right">
+                <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400 dark:text-slate-500" x-text="locationHistoryModal.data.length + ' Recent Moves Shown'"></span>
+            </div>
+        </div>
+    </div>
     </div>
 @endsection
 
@@ -1049,5 +1154,52 @@
 
 </script>
 @endif
-    </div>
+    <script>
+        function dashboard() {
+            return {
+                locationHistoryModal: {
+                    open: false,
+                    locationName: '',
+                    loading: false,
+                    error: null,
+                    data: []
+                },
+                
+                formatDate(dateStr) {
+                    if (!dateStr) return '-';
+                    const d = new Date(dateStr);
+                    if (isNaN(d.getTime())) return dateStr;
+                    return d.toLocaleDateString('id-ID', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                },
+
+                async openLocationHistory(locationName) {
+                    this.locationHistoryModal.open = true;
+                    this.locationHistoryModal.locationName = locationName;
+                    this.locationHistoryModal.loading = true;
+                    this.locationHistoryModal.error = null;
+                    this.locationHistoryModal.data = [];
+                    
+                    try {
+                        const response = await fetch(`/api/location-history?location=${encodeURIComponent(locationName)}`);
+                        if (!response.ok) throw new Error('API server returned error');
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            this.locationHistoryModal.data = result.data;
+                        } else {
+                            this.locationHistoryModal.error = result.message || 'Failed to fetch movement history';
+                        }
+                    } catch (e) {
+                        this.locationHistoryModal.error = 'Connection failed: ' + e.message;
+                    } finally {
+                        this.locationHistoryModal.loading = false;
+                    }
+                }
+            }
+        }
+    </script>
 @endsection

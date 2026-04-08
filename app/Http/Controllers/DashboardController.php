@@ -618,5 +618,26 @@ class DashboardController extends Controller
             ])->values()->toArray(),
         ])->sortByDesc('lot_count')->values();
     }
+    /**
+     * Fetch movement history for a specific location from Odoo.
+     */
+    public function apiLocationHistory(Request $request)
+    {
+        $location = $request->query('location');
+        if (!$location) {
+            return response()->json(['success' => false, 'message' => 'Location name is required.']);
+        }
+
+        try {
+            $odoo = new \App\Services\OdooService();
+            $result = $odoo->fetchLocationHistory($location);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch location history: ' . $e->getMessage()
+            ]);
+        }
+    }
 }
 
