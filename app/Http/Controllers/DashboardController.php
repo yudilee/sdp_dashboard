@@ -314,8 +314,8 @@ class DashboardController extends Controller
              if ($sub == 'Vendor Rent') $query->where('is_vendor_rent', true);
              elseif ($sub == 'Original in Customer') $query->whereColumn('lot_number', 'reserved_lot')->whereNotNull('reserved_lot')->where('reserved_lot', '!=', '')->where('is_vendor_rent', false);
              elseif ($sub == 'Replacement') $query->whereNotNull('rental_id')->where('rental_id', '!=', '')->whereColumn('lot_number', '!=', 'reserved_lot')->where('is_vendor_rent', false);
-             elseif ($sub == 'Replacement - Service') $query->whereNotNull('rental_id')->where('rental_id', '!=', '')->whereColumn('lot_number', '!=', 'reserved_lot')->where('is_vendor_rent', false)->where('rental_id_count', '>', 1);
-             elseif ($sub == 'Replacement - RBO') $query->whereNotNull('rental_id')->where('rental_id', '!=', '')->whereColumn('lot_number', '!=', 'reserved_lot')->where('is_vendor_rent', false)->where('rental_id_count', 1);
+             elseif ($sub == 'Replacement - Service') $query->whereNotNull('rental_id')->where('rental_id', '!=', '')->whereColumn('lot_number', '!=', 'reserved_lot')->where('is_vendor_rent', false)->where('product_movement_count', '>', 1);
+             elseif ($sub == 'Replacement - RBO') $query->whereNotNull('rental_id')->where('rental_id', '!=', '')->whereColumn('lot_number', '!=', 'reserved_lot')->where('is_vendor_rent', false)->where('product_movement_count', '=', 1);
              elseif ($sub == 'Check Rent position') $query->where(function($q) { $q->whereNull('rental_id')->orWhere('rental_id', ''); })->where('is_vendor_rent', false);
         } elseif ($category == 'external_service' || $category == 'service_external') {
              $inventory->scopeExternalService($query);

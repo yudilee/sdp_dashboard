@@ -185,11 +185,22 @@ class SummaryGenerator
         
         // Pre-compute rental_id occurrence counts
         $rentalIdCounts = [];
+        $uniqueRentalIdsForOdoo = [];
         foreach ($data as $row) {
             $rentalId = trim($row[$idxParams['rental_id']] ?? '');
             if (!empty($rentalId)) {
                 $rentalIdCounts[$rentalId] = ($rentalIdCounts[$rentalId] ?? 0) + 1;
+                $uniqueRentalIdsForOdoo[$rentalId] = true;
             }
+        }
+        
+        // Fetch Product Movement Counts
+        $productMovementCounts = [];
+        try {
+            $odoo = app(\App\Services\OdooService::class);
+            $productMovementCounts = $odoo->fetchProductMovementCounts(array_keys($uniqueRentalIdsForOdoo));
+        } catch (\Exception $e) {
+            \Log::warning('Could not fetch product movement counts: ' . $e->getMessage());
         }
         
         // Date Logic Setup
@@ -380,11 +391,12 @@ class SummaryGenerator
                      $summary['rented_in_customer']['details']['Original in Customer'] += $qty;
                 } elseif ($this->inventoryService->isReplacement($lotNo, $reservedLot, $rentalId, $isVendorRent)) {
                      // Replacement - split into Service vs RBO
-                     if ($rentalIdCount > 1) {
-                         // Service: rental_id appears more than once (main vehicle exists, likely in service)
+                     $movementCount = $productMovementCounts[$rentalId] ?? 0;
+                     if ($movementCount > 1) {
+                         // Service: more than 1 historical movement
                          $summary['rented_in_customer']['details']['Replacement - Service'] += $qty;
                      } else {
-                         // RBO: Rental Before Original - only this replacement exists
+                         // RBO: exactly 1 historical movement
                          $summary['rented_in_customer']['details']['Replacement - RBO'] += $qty;
                      }
                 } elseif (empty($rentalId)) {
@@ -483,6 +495,7 @@ class SummaryGenerator
                 'vehicle_role' => $vehicleRole,
                 'linked_vehicle' => null, // Will be populated in second pass
                 'rental_id_count' => $rentalIdCounts[$rentalId] ?? 0,
+                'product_movement_count' => $productMovementCounts[$rentalId] ?? 0,
                 'last_customer' => $row[$idxParams['last_customer']] ?? null,
                 'current_customer' => $row[$idxParams['current_customer']] ?? null,
                 'warehouse' => $row[$idxParams['warehouse']] ?? null,
@@ -587,6 +600,7 @@ class SummaryGenerator
                     'km_last' => $item['km_last'],
                     'vehicle_role' => $item['vehicle_role'],
                     'rental_id_count' => $item['rental_id_count'],
+                    'product_movement_count' => $item['product_movement_count'],
                     'linked_vehicle' => $item['linked_vehicle'],
                     'category_flags' => json_encode($item['category_flags']),
                     'last_customer' => $item['last_customer'],

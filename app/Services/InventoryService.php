@@ -217,7 +217,7 @@ class InventoryService
                     ->where('rental_id', '!=', '')
                     ->whereColumn('lot_number', '!=', 'reserved_lot')
                     ->where('is_vendor_rent', false)
-                    ->where('rental_id_count', '>', 1);
+                    ->where('product_movement_count', '>', 1);
             }
             elseif ($value === 'rented_replacement_rbo') {
                  $this->scopeRented($query)
@@ -225,7 +225,7 @@ class InventoryService
                     ->where('rental_id', '!=', '')
                     ->whereColumn('lot_number', '!=', 'reserved_lot')
                     ->where('is_vendor_rent', false)
-                    ->where('rental_id_count', 1);
+                    ->where('product_movement_count', '=', 1);
             }
              elseif ($value === 'rented_check_position') {
                  $this->scopeRented($query)

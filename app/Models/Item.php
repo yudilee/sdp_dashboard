@@ -21,6 +21,7 @@ class Item extends Model
         'category_flags' => 'array',
         'km_last' => 'float',
         'rental_id_count' => 'integer',
+        'product_movement_count' => 'integer',
         'repair_schedule_date' => 'date',
         'repair_estimation_end' => 'date',
         'repair_odometer' => 'integer',

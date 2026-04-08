@@ -654,6 +654,41 @@ class OdooService
     }
 
     /**
+     * Fetch product movement counts for given rental order names.
+     * 
+     * @param array $rentalOrderNames
+     * @return array [rental_order_name => count]
+     */
+    public function fetchProductMovementCounts(array $rentalOrderNames): array
+    {
+        if (empty($rentalOrderNames)) {
+            return [];
+        }
+
+        $counts = [];
+        try {
+            // product.movement model uses order_id which links to sale.order.
+            // We can search by order_id.name to match the rental order names.
+            $domain = [['order_id.name', 'in', $rentalOrderNames]];
+            
+            $movements = $this->execute('product.movement', 'search_read', [$domain], [
+                'fields' => ['order_id'],
+            ]);
+
+            foreach ($movements as $m) {
+                if (!empty($m['order_id']) && is_array($m['order_id'])) {
+                    $name = $m['order_id'][1];
+                    $counts[$name] = ($counts[$name] ?? 0) + 1;
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to fetch product movement counts: ' . $e->getMessage());
+        }
+
+        return $counts;
+    }
+
+    /**
      * Resolve lot numbers to Odoo stock.lot IDs.
      *
      * @param array $lotNumbers
