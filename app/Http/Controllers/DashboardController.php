@@ -525,4 +525,98 @@ class DashboardController extends Controller
             ]);
         }
     }
+
+    /**
+     * Page: Active Rentals grouped by Customer with lot serial count.
+     */
+    public function activeRentalsByCustomer()
+    {
+        $result = $this->buildActiveRentalsByCustomerData();
+
+        $totalCustomers = $result->count();
+        $totalLots = $result->sum('lot_count');
+
+        return view('active_rentals_by_customer', compact('result', 'totalCustomers', 'totalLots'));
+    }
+
+    /**
+     * Export: Active Rentals grouped by Customer.
+     */
+    public function exportActiveRentalsByCustomer(Request $request)
+    {
+        $result = $this->buildActiveRentalsByCustomerData();
+        $format = $request->query('format', 'xlsx');
+        $timestamp = date('Y-m-d_H-i-s');
+        $filename = "active_rentals_by_customer_{$timestamp}.{$format}";
+
+        $export = new \App\Exports\ActiveRentalByCustomerExport($result->toArray());
+
+        if ($format === 'csv') {
+            return Excel::download($export, $filename, \Maatwebsite\Excel\Excel::CSV);
+        }
+        return Excel::download($export, $filename, \Maatwebsite\Excel\Excel::XLSX);
+    }
+
+    /**
+     * Shared: Build active rentals grouped by customer data.
+     */
+    private function buildActiveRentalsByCustomerData()
+    {
+        $today = now()->format('Y-m-d');
+
+        $items = Item::where('is_sold', false)
+            ->where(function($q) use ($today) {
+                // 1. Customer Location
+                $q->where(function($sub) use ($today) {
+                    $sub->where('location', Location::RENTAL_CUSTOMER)
+                        ->where(function($d) use ($today) {
+                            $d->whereNull('actual_start_rental')
+                              ->orWhere('actual_start_rental', '<=', $today);
+                        });
+                });
+
+                // 2. In Stock Active (Original, Count 1)
+                $q->orWhere(function($sub) use ($today) {
+                    $sub->where('in_stock', true)
+                        ->whereColumn('lot_number', 'reserved_lot')
+                        ->whereNotNull('rental_id')
+                        ->where('rental_id_count', 1)
+                        ->where(function($d) use ($today) {
+                            $d->whereNull('actual_start_rental')
+                              ->orWhere('actual_start_rental', '<=', $today);
+                        });
+                });
+
+                // 3. Service/Insurance Active (Original, Count 1)
+                $q->orWhere(function($sub) use ($today) {
+                    $sub->where(function($l) {
+                            $l->where('location', 'like', Location::SERVICE_EXTERNAL . '%')
+                              ->orWhere('location', Location::SERVICE_INTERNAL)
+                              ->orWhere('location', 'like', Location::INSURANCE . '%');
+                        })
+                        ->whereColumn('lot_number', 'reserved_lot')
+                        ->whereNotNull('rental_id')
+                        ->where('rental_id_count', 1)
+                        ->where(function($d) use ($today) {
+                            $d->whereNull('actual_start_rental')
+                              ->orWhere('actual_start_rental', '<=', $today);
+                        });
+                });
+            })
+            ->get(['lot_number', 'product', 'current_customer', 'location', 'rental_type', 'rental_id']);
+
+        $grouped = $items->groupBy(fn($item) => $item->current_customer ?: 'Unknown');
+
+        return $grouped->map(fn($group, $customer) => [
+            'customer' => $customer,
+            'lot_count' => $group->count(),
+            'lots' => $group->map(fn($i) => [
+                'lot_number' => $i->lot_number,
+                'product' => $i->product,
+                'location' => $i->location,
+                'rental_type' => $i->rental_type,
+            ])->values()->toArray(),
+        ])->sortByDesc('lot_count')->values();
+    }
 }
+

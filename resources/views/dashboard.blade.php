@@ -408,16 +408,27 @@
             
             <!-- Active Rental Detail -->
             <div class="bg-amber-100 dark:bg-amber-900/30 rounded-2xl shadow-sm border border-amber-100 dark:border-amber-800 p-6">
-                <div class="flex items-center gap-2 mb-6 pb-4 border-b border-amber-200/50 dark:border-amber-800">
-                    <div class="p-2 bg-amber-200 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="flex items-center justify-between gap-2 mb-6 pb-4 border-b border-amber-200/50 dark:border-amber-800">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-amber-200 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <a href="{{ route('details', ['category' => 'active_rentals']) }}" class="group/title">
+                                 <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover/title:text-indigo-600 transition-colors">Active Rental Detail</h3>
+                            </a>
+                            <p class="text-sm font-bold text-slate-600 dark:text-slate-400 mt-1">Total Active: {{ number_format($activeRentalData['total'] ?? 0) }}</p>
+                        </div>
                     </div>
-                    <div>
-                        <a href="{{ route('details', ['category' => 'active_rentals']) }}" class="group/title">
-                             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover/title:text-indigo-600 transition-colors">Active Rental Detail</h3>
-                        </a>
-                        <p class="text-sm font-bold text-slate-600 dark:text-slate-400 mt-1">Total Active: {{ number_format($activeRentalData['total'] ?? 0) }}</p>
-                    </div>
+                    <!-- Group by Customer Link -->
+                    <a href="{{ route('active-rentals.by-customer') }}" id="btn-group-by-customer"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold 
+                              bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 
+                              border border-indigo-200 dark:border-indigo-800 
+                              hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all hover:shadow-sm whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Group by Customer
+                    </a>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
@@ -1034,6 +1045,8 @@
     
     const activeRentalChart = new ApexCharts(document.querySelector("#activeRentalChart"), activeRentalOptions);
     activeRentalChart.render();
+
+
 </script>
 @endif
     </div>

@@ -41,3 +41,7 @@ Route::get('/api/repair-history/{lotNumber}', [DashboardController::class, 'repa
 
 // Traceability Report API
 Route::get('/api/traceability/{lotNumber}', [DashboardController::class, 'traceabilityReport'])->name('api.traceability');
+
+// Active Rentals grouped by Customer
+Route::get('/active-rentals/by-customer', [DashboardController::class, 'activeRentalsByCustomer'])->name('active-rentals.by-customer');
+Route::get('/active-rentals/by-customer/export', [DashboardController::class, 'exportActiveRentalsByCustomer'])->name('active-rentals.by-customer.export');
