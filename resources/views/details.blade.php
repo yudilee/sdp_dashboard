@@ -110,12 +110,12 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                    <input x-model="search" type="text" class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Search...">
+                    <input x-model="search" type="text" class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder-slate-900 dark:placeholder-slate-300" placeholder="Search...">
                 </div>
 
                 <!-- Columns Dropdown -->
                 <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-400 dark:border-slate-500 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
                         Cols
                     </button>
@@ -148,7 +148,7 @@
         <!-- Filter Row -->
         <div class="flex flex-wrap gap-3 pb-2 overflow-x-auto no-scrollbar">
             <!-- Location Filter -->
-            <select x-model="filters.location" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 transition-colors">
+            <select x-model="filters.location" class="px-3 py-1.5 rounded-lg border border-slate-400 dark:border-slate-500 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 transition-colors">
                 <option value="">All Locations</option>
                 @foreach($locations as $loc)
                 <option value="{{ $loc }}">{{ $loc }}</option>
@@ -156,7 +156,7 @@
             </select>
 
             <!-- Role Filter -->
-            <select x-model="filters.role" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 transition-colors">
+            <select x-model="filters.role" class="px-3 py-1.5 rounded-lg border border-slate-400 dark:border-slate-500 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 transition-colors">
                 <option value="">All Roles</option>
                 @foreach($roles as $role)
                 <option value="{{ $role }}">{{ $role }}</option>
@@ -164,7 +164,7 @@
             </select>
 
             <!-- Type Filter -->
-            <select x-model="filters.type" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 transition-colors">
+            <select x-model="filters.type" class="px-3 py-1.5 rounded-lg border border-slate-400 dark:border-slate-500 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 transition-colors">
                 <option value="">All Types</option>
                 @foreach($types as $type)
                 <option value="{{ $type }}">{{ $type }}</option>
@@ -172,7 +172,7 @@
             </select>
 
             <!-- Year Filter -->
-            <select x-model="filters.year" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 transition-colors">
+            <select x-model="filters.year" class="px-3 py-1.5 rounded-lg border border-slate-400 dark:border-slate-500 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 transition-colors">
                 <option value="">All Years</option>
                 @foreach($years as $yr)
                 <option value="{{ $yr }}">{{ $yr }}</option>
@@ -382,9 +382,9 @@
     
     <!-- Pagination -->
     <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950" x-show="filteredItems.length > pageSize">
-        <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors shadow-sm">Previous</button>
+        <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 rounded-xl border border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors shadow-sm">Previous</button>
         <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span></span>
-        <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors shadow-sm">Next</button>
+        <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 rounded-xl border border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors shadow-sm">Next</button>
     </div>
 
     <!-- Repair History Modal -->

@@ -26,13 +26,47 @@
     @if(isset($summary))
     <!-- Search Bar -->
     <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 mb-8">
-        <form action="{{ route('details') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-center">
+        <form action="{{ route('details') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-center" @submit.prevent="if(search.selectedIndex >= 0) selectSuggestion(search.selectedIndex); else $el.submit()">
             <input type="hidden" name="category" value="search">
-            <div class="relative w-full md:w-96">
+            <div class="relative w-full md:w-96" @click.away="search.showSuggestions = false">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-                <input type="text" name="q" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Search lot number, product...">
+                <input type="text" name="q" x-model="search.query" 
+                       @input.debounce.300ms="fetchSuggestions()"
+                       @keydown.arrow-down.prevent="search.selectedIndex = Math.min(search.selectedIndex + 1, search.suggestions.length - 1)"
+                       @keydown.arrow-up.prevent="search.selectedIndex = Math.max(search.selectedIndex - 1, -1)"
+                       @keydown.enter.prevent="if(search.selectedIndex >= 0) selectSuggestion(search.selectedIndex); else $el.closest('form').submit()"
+                       @focus="if(search.suggestions.length > 0) search.showSuggestions = true"
+                       autocomplete="off"
+                       class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-400 dark:border-slate-500 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-900 placeholder:opacity-100 dark:placeholder:text-slate-300" 
+                       placeholder="Search lot number, product...">
+
+                <!-- Suggestions Dropdown -->
+                <div x-show="search.showSuggestions" x-cloak
+                     class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-300 dark:border-slate-600 overflow-hidden">
+                    <div class="max-height-[300px] overflow-y-auto">
+                        <template x-for="(suggestion, index) in search.suggestions" :key="index">
+                            <div @click="selectSuggestion(index)"
+                                 @mouseenter="search.selectedIndex = index"
+                                 :class="{'bg-indigo-50 dark:bg-indigo-900/30': search.selectedIndex === index, 'border-indigo-500': search.selectedIndex === index}"
+                                 class="px-4 py-3 cursor-pointer border-l-4 border-transparent hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all">
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100" x-text="suggestion.lot_number"></span>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400" x-text="suggestion.product"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div x-show="search.isLoading" class="absolute right-3 top-3">
+                    <svg class="animate-spin h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                </div>
             </div>
             <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-slate-800 dark:bg-indigo-600 text-white rounded-xl font-medium hover:bg-slate-700 dark:hover:bg-indigo-700 transition-colors shadow-lg shadow-slate-200 dark:shadow-indigo-900/20">Search</button>
             <div class="w-full md:w-auto flex gap-2 md:ml-auto overflow-x-auto pb-2 md:pb-0">
@@ -132,7 +166,7 @@
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <!-- In Stock KPI -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-300 dark:border-slate-700 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <div class="p-1.5 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
@@ -165,7 +199,7 @@
         </div>
 
         <!-- Active Rental KPI -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-300 dark:border-slate-700 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <div class="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
@@ -198,7 +232,7 @@
         </div>
 
         <!-- In Service KPI -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-300 dark:border-slate-700 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <div class="p-1.5 bg-red-100 dark:bg-red-900/50 rounded-lg">
@@ -235,7 +269,7 @@
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 animate-enter delay-100">
         <!-- In Stock -->
-        <a href="{{ route('details', ['category' => 'in_stock']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+        <a href="{{ route('details', ['category' => 'in_stock']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-300 dark:border-slate-700 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500 rounded-l-2xl"></div>
             <div class="flex items-center">
                 <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">In Stock</p>
@@ -248,7 +282,7 @@
         </a>
 
         <!-- Rented -->
-        <a href="{{ route('details', ['category' => 'rented']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+        <a href="{{ route('details', ['category' => 'rented']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-300 dark:border-slate-700 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500 rounded-l-2xl"></div>
             <div class="flex items-center">
                 <p class="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-1">Rented In Customer</p>
@@ -261,7 +295,7 @@
         </a>
 
         <!-- In Service -->
-        <a href="{{ route('details', ['category' => 'in_service']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+        <a href="{{ route('details', ['category' => 'in_service']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-300 dark:border-slate-700 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500 rounded-l-2xl"></div>
             <div class="flex items-center">
                 <p class="text-sm font-bold text-red-600 dark:text-red-400 uppercase tracking-wide mb-1">In Service</p>
@@ -1163,6 +1197,44 @@
                     loading: false,
                     error: null,
                     data: []
+                },
+
+                search: {
+                    query: '',
+                    suggestions: [],
+                    selectedIndex: -1,
+                    showSuggestions: false,
+                    isLoading: false,
+                },
+
+                async fetchSuggestions() {
+                    if (this.search.query.length < 2) {
+                        this.search.suggestions = [];
+                        this.search.showSuggestions = false;
+                        return;
+                    }
+
+                    this.search.isLoading = true;
+                    try {
+                        const response = await fetch(`/api/suggestions?q=${encodeURIComponent(this.search.query)}`);
+                        const data = await response.json();
+                        this.search.suggestions = data;
+                        this.search.showSuggestions = data.length > 0;
+                        this.search.selectedIndex = -1;
+                    } catch (e) {
+                        console.error('Failed to fetch suggestions', e);
+                    } finally {
+                        this.search.isLoading = false;
+                    }
+                },
+
+                selectSuggestion(index) {
+                    if (index >= 0 && index < this.search.suggestions.length) {
+                        const suggestion = this.search.suggestions[index];
+                        this.search.query = suggestion.lot_number;
+                        this.search.showSuggestions = false;
+                        window.location.href = `/details?category=search&q=${encodeURIComponent(suggestion.lot_number)}`;
+                    }
                 },
                 
                 formatDate(dateStr) {

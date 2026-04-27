@@ -639,5 +639,25 @@ class DashboardController extends Controller
             ]);
         }
     }
+
+    /**
+     * Fetch search suggestions (lot_number and product) based on query.
+     */
+    public function suggestions(Request $request)
+    {
+        $q = $request->query('q');
+        if (!$q || strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $suggestions = Item::where('lot_number', 'like', "%$q%")
+            ->orWhere('product', 'like', "%$q%")
+            ->select('lot_number', 'product')
+            ->distinct()
+            ->limit(10)
+            ->get();
+
+        return response()->json($suggestions);
+    }
 }
 

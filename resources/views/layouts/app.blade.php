@@ -37,6 +37,17 @@
         .theme-transition {
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
+
+        /* Force Search Placeholder Visibility */
+        input[name="q"]::placeholder,
+        input[x-model="search"]::placeholder {
+            color: #0f172a !important; /* slate-900 */
+            opacity: 1 !important;
+        }
+        .dark input[name="q"]::placeholder,
+        .dark input[x-model="search"]::placeholder {
+            color: #cbd5e1 !important; /* slate-300 */
+        }
     </style>
     <script>
         // On page load or when changing themes, best to add inline in `head` to avoid FOUC
@@ -95,10 +106,10 @@
         <!-- Sidebar -->
         <aside 
             :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full lg:translate-x-0': !sidebarOpen, 'lg:w-20': sidebarCollapsed, 'lg:w-64': !sidebarCollapsed }"
-            class="fixed inset-y-0 left-0 z-40 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 lg:static transform flex flex-col w-64 h-screen lg:h-auto overflow-hidden">
+            class="fixed inset-y-0 left-0 z-40 bg-white dark:bg-slate-900 border-r border-slate-300 dark:border-slate-700 transition-all duration-300 lg:static transform flex flex-col w-64 h-screen lg:h-auto overflow-hidden">
             
             <!-- Sidebar Header -->
-            <div class="h-20 flex items-center justify-center border-b border-slate-100 flex-shrink-0" :class="sidebarCollapsed ? 'px-0' : 'px-6 justify-start'">
+            <div class="h-20 flex items-center justify-center border-b border-slate-300 dark:border-slate-700 flex-shrink-0" :class="sidebarCollapsed ? 'px-0' : 'px-6 justify-start'">
                 <img src="{{ asset('images/logo.png') }}" alt="HARENT Dashboard" 
                      class="transition-all duration-300 object-contain"
                      :class="sidebarCollapsed ? 'h-8 w-8' : 'h-12 w-auto'" />
@@ -189,7 +200,7 @@
             </nav>
 
             <!-- Sidebar Footer -->
-            <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 whitespace-nowrap overflow-hidden transition-all duration-300 flex-shrink-0"
+            <div class="p-4 border-t border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 whitespace-nowrap overflow-hidden transition-all duration-300 flex-shrink-0"
                  :class="sidebarCollapsed ? 'items-center justify-center p-2' : ''">
                 <div class="flex items-center gap-3" :class="sidebarCollapsed ? 'justify-center' : ''">
                     <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-xs flex-shrink-0">
@@ -209,7 +220,7 @@
         <!-- Main Content -->
         <main class="flex-1 min-w-0 overflow-hidden bg-slate-50/50 dark:bg-slate-950 flex flex-col theme-transition">
             <!-- Desktop Top Bar -->
-            <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 hidden lg:flex items-center gap-4 sticky top-0 z-20">
+            <div class="bg-white dark:bg-slate-900 border-b border-slate-300 dark:border-slate-700 p-4 hidden lg:flex items-center gap-4 sticky top-0 z-20">
                 <button @click="sidebarCollapsed = !sidebarCollapsed" class="p-2 text-slate-500 hover:text-indigo-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                 </button>
@@ -219,12 +230,12 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
-                        <input type="text" name="q" class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500" placeholder="Global Search (Lot, Product, Location)...">
+                        <input type="text" name="q" class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-400 dark:border-slate-500 text-slate-600 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-700 placeholder:text-slate-900 placeholder:opacity-100 dark:placeholder:text-slate-300" placeholder="Global Search (Lot, Product, Location)...">
                     </form>
                 </div>
 
                 <!-- Theme Toggle -->
-                <button @click="toggleTheme()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-100 dark:hover:border-indigo-900 transition-all shadow-sm">
+                <button @click="toggleTheme()" class="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-100 dark:hover:border-indigo-900 transition-all shadow-sm">
                     <svg x-show="!isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                     <svg x-show="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </button>

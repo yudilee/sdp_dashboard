@@ -1212,7 +1212,8 @@ class OdooService
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => ['Content-Type: text/xml; charset=utf-8'],
             CURLOPT_TIMEOUT => 60,
-            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYPEER => env('ODOO_SSL_VERIFY', true),
+            CURLOPT_SSL_VERIFYHOST => env('ODOO_SSL_VERIFY', true) ? 2 : 0,
         ]);
         
         $response = curl_exec($ch);
