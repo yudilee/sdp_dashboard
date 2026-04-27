@@ -39,12 +39,12 @@
                        @keydown.enter.prevent="if(search.selectedIndex >= 0) selectSuggestion(search.selectedIndex); else $el.closest('form').submit()"
                        @focus="if(search.suggestions.length > 0) search.showSuggestions = true"
                        autocomplete="off"
-                       class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                       class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-400 dark:border-slate-500 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-900 placeholder:opacity-100 dark:placeholder:text-slate-300" 
                        placeholder="Search lot number, product...">
 
                 <!-- Suggestions Dropdown -->
                 <div x-show="search.showSuggestions" x-cloak
-                     class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                     class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-300 dark:border-slate-600 overflow-hidden">
                     <div class="max-height-[300px] overflow-y-auto">
                         <template x-for="(suggestion, index) in search.suggestions" :key="index">
                             <div @click="selectSuggestion(index)"
@@ -166,7 +166,7 @@
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <!-- In Stock KPI -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-300 dark:border-slate-700 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <div class="p-1.5 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
@@ -199,7 +199,7 @@
         </div>
 
         <!-- Active Rental KPI -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-300 dark:border-slate-700 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <div class="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
@@ -232,7 +232,7 @@
         </div>
 
         <!-- In Service KPI -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-300 dark:border-slate-700 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <div class="p-1.5 bg-red-100 dark:bg-red-900/50 rounded-lg">
@@ -269,7 +269,7 @@
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 animate-enter delay-100">
         <!-- In Stock -->
-        <a href="{{ route('details', ['category' => 'in_stock']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+        <a href="{{ route('details', ['category' => 'in_stock']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-300 dark:border-slate-700 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500 rounded-l-2xl"></div>
             <div class="flex items-center">
                 <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">In Stock</p>
@@ -282,7 +282,7 @@
         </a>
 
         <!-- Rented -->
-        <a href="{{ route('details', ['category' => 'rented']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+        <a href="{{ route('details', ['category' => 'rented']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-300 dark:border-slate-700 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500 rounded-l-2xl"></div>
             <div class="flex items-center">
                 <p class="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-1">Rented In Customer</p>
@@ -295,7 +295,7 @@
         </a>
 
         <!-- In Service -->
-        <a href="{{ route('details', ['category' => 'in_service']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+        <a href="{{ route('details', ['category' => 'in_service']) }}" class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-slate-300 dark:border-slate-700 hover:shadow-lg dark:hover:bg-slate-800 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500 rounded-l-2xl"></div>
             <div class="flex items-center">
                 <p class="text-sm font-bold text-red-600 dark:text-red-400 uppercase tracking-wide mb-1">In Service</p>
