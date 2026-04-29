@@ -505,6 +505,7 @@ class SummaryGenerator
                 'last_customer' => $row[$idxParams['last_customer']] ?? null,
                 'current_customer' => $row[$idxParams['current_customer']] ?? null,
                 'warehouse' => $row[$idxParams['warehouse']] ?? null,
+                'vendor_unit' => null, // Will be enriched later
             ];
         }
         
@@ -612,6 +613,7 @@ class SummaryGenerator
                     'last_customer' => $item['last_customer'],
                     'current_customer' => $item['current_customer'],
                     'warehouse' => $item['warehouse'],
+                    'vendor_unit' => $item['vendor_unit'] ?? null,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];

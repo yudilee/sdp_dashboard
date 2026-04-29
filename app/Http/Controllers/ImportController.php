@@ -98,8 +98,9 @@ class ImportController extends Controller
             // Save to database (same as Excel import)
             $generator->saveToDatabase($processedData['items'], $processedData['summary'], 'odoo_manual');
             
-            // --- Repair Order Enrichment ---
+            // --- Enrichment ---
             $this->enrichWithRepairData($odoo);
+            $this->enrichWithVendorUnits($odoo);
             
             return response()->json([
                 'success' => true,
@@ -165,6 +166,38 @@ class ImportController extends Controller
                 'repair_odometer' => null,
                 'repair_estimation_end' => null,
             ]);
+        }
+    }
+
+    /**
+     * Enrich items with vendor unit data from Odoo traceability.
+     */
+    public function enrichWithVendorUnits(OdooService $odoo): void
+    {
+        // Fetch all lot numbers that don't have a vendor_unit yet
+        $lots = \App\Models\Item::whereNull('vendor_unit')->whereNotNull('lot_number')->pluck('lot_number')->unique()->toArray();
+
+        if (empty($lots)) {
+            return;
+        }
+
+        // Resolve lot numbers to Odoo IDs
+        $lotMap = $odoo->resolveLotIds($lots);
+
+        if (empty($lotMap)) {
+            return;
+        }
+
+        // Fetch vendor units
+        $vendorData = $odoo->fetchVendorUnits(array_values($lotMap));
+
+        // Map back to lot numbers and update
+        $lotIdToName = array_flip($lotMap);
+        foreach ($vendorData as $lotId => $vendorName) {
+            $lotNumber = $lotIdToName[$lotId] ?? null;
+            if ($lotNumber) {
+                \App\Models\Item::where('lot_number', $lotNumber)->update(['vendor_unit' => $vendorName]);
+            }
         }
     }
 

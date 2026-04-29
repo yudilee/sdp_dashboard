@@ -202,6 +202,10 @@
                         <div @click="sortBy('year')" class="flex items-center gap-1">Year <span x-show="sortCol === 'year'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                          <div @mousedown="startResize($event, 'year')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
                     </th>
+                    <th x-show="columns.vendor_unit.visible" :style="'width: ' + columns.vendor_unit.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 text-left cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
+                        <div @click="sortBy('vendor_unit')" class="flex items-center gap-1">Vendor Unit <span x-show="sortCol === 'vendor_unit'" x-text="sortAsc ? '↑' : '↓'"></span></div>
+                        <div @mousedown="startResize($event, 'vendor_unit')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
+                    </th>
                     <th x-show="columns.location.visible" :style="'width: ' + columns.location.width + 'px'" class="relative p-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none group">
                         <div @click="sortBy('location')" class="flex items-center gap-1">Location <span x-show="sortCol === 'location'" x-text="sortAsc ? '↑' : '↓'"></span></div>
                          <div @mousedown="startResize($event, 'location')" class="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-400 group-hover:bg-slate-300 dark:group-hover:bg-slate-700 transition-colors"></div>
@@ -295,6 +299,7 @@
                             <div class="text-xs text-slate-500 dark:text-slate-400 font-mono" x-show="item.internal_reference && item.internal_reference !== 'No Ref'" x-text="item.internal_reference"></div>
                         </td>
                         <td x-show="columns.year.visible" class="p-4 text-center text-sm font-medium text-slate-600 dark:text-slate-400" x-text="item.year || '-'"></td>
+                        <td x-show="columns.vendor_unit.visible" class="p-4 break-words text-xs text-slate-600 dark:text-slate-400" x-text="item.vendor_unit || '-'"></td>
                         <td x-show="columns.location.visible" class="p-4 break-words">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200" x-text="item.location"></span>
                         </td>
@@ -655,6 +660,7 @@
                 lot_number: { label: 'Lot Number', visible: true, width: 150 },
                 product: { label: 'Product', visible: true, width: 250 },
                 year: { label: 'Year', visible: true, width: 70 },
+                vendor_unit: { label: 'Vendor Unit', visible: true, width: 150 },
                 location: { label: 'Location', visible: true, width: 140 },
                 qty: { label: 'Qty', visible: true, width: 60 },
                 type: { label: 'Type', visible: true, width: 80 },

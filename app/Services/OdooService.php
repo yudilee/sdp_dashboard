@@ -747,6 +747,53 @@ class OdooService
     }
 
     /**
+     * Fetch vendor unit (partner name) for given lot IDs.
+     * Searches for move lines where the lot was received from a vendor location.
+     * 
+     * @param array $lotIds
+     * @return array [odoo_lot_id => partner_name]
+     */
+    public function fetchVendorUnits(array $lotIds): array
+    {
+        if (empty($lotIds)) {
+            return [];
+        }
+
+        try {
+            // Find moves where location_id is a vendor location (usage = supplier)
+            $domain = [
+                ['lot_id', 'in', $lotIds],
+                ['location_id.usage', '=', 'supplier'],
+                ['state', '=', 'done']
+            ];
+            
+            $moveLines = $this->execute('stock.move.line', 'search_read', [$domain], [
+                'fields' => ['lot_id', 'picking_partner_id'],
+            ]);
+
+            $result = [];
+            foreach ($moveLines as $line) {
+                $lotId = is_array($line['lot_id'] ?? null) ? $line['lot_id'][0] : ($line['lot_id'] ?? null);
+                if (!$lotId) continue;
+
+                // partner_id on picking usually maps to picking_partner_id on move line
+                $partner = is_array($line['picking_partner_id'] ?? null) ? $line['picking_partner_id'][1] : null;
+                
+                if ($partner) {
+                    // Use the most recent move (last one found usually or we could order by date)
+                    // If multiple found, the later ones in loop will override (or we can use date desc)
+                    $result[$lotId] = $partner;
+                }
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            \Log::warning('Failed to fetch vendor units: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Resolve lot numbers to Odoo stock.lot IDs.
      *
      * @param array $lotNumbers
