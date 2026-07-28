@@ -1402,4 +1402,119 @@ class OdooService
             'data' => $data
         ];
     }
+
+    /**
+     * Fetch PIC Name and Email for given Rental IDs from sale.order and res.partner
+     * 
+     * @param array $rentalIds
+     * @return array [rental_id => ['pic_name' => ..., 'pic_email' => ...]]
+     */
+    public function fetchBulkCrmData(array $rentalIds): array
+    {
+        if (empty($rentalIds)) {
+            return [];
+        }
+
+        try {
+            // 1. Search sale.order to get partner_id
+            $orders = $this->execute('sale.order', 'search_read', [
+                [['name', 'in', array_values($rentalIds)]]
+            ], [
+                'fields' => ['name', 'partner_id', 'rental_start_date', 'rental_return_date'],
+            ]);
+
+            $partnerIds = [];
+            $orderToPartnerMap = [];
+            foreach ($orders as $order) {
+                if (!empty($order['partner_id']) && is_array($order['partner_id'])) {
+                    $partnerId = $order['partner_id'][0];
+                    $partnerIds[] = $partnerId;
+                    $orderToPartnerMap[$order['name']] = [
+                        'partner_id' => $partnerId,
+                        'rental_start_date' => $order['rental_start_date'] ?? null,
+                        'rental_return_date' => $order['rental_return_date'] ?? null
+                    ];
+                }
+            }
+
+            if (empty($partnerIds)) {
+                return [];
+            }
+
+            // Fetch main partner details as fallback
+            $uniquePartnerIds = array_values(array_unique($partnerIds));
+            $mainPartners = $this->execute('res.partner', 'search_read', [[['id', 'in', $uniquePartnerIds]]], [
+                'fields' => ['name', 'email', 'title', 'is_company'],
+            ]);
+
+            $mainPartnerDetails = [];
+            foreach ($mainPartners as $mp) {
+                $title = '';
+                if (!empty($mp['title']) && is_array($mp['title'])) {
+                    $title = $mp['title'][1] . ' ';
+                }
+                $mpName = is_string($mp['name']) ? $mp['name'] : '';
+                $mpEmail = is_string($mp['email']) ? $mp['email'] : '';
+                
+                $mainPartnerDetails[$mp['id']] = [
+                    'pic_name' => trim($title . $mpName),
+                    'pic_email' => $mpEmail,
+                    'is_company' => !empty($mp['is_company']),
+                ];
+            }
+
+            // 2. Fetch contact persons (children of the main partners)
+            $contactDomain = [
+                ['parent_id', 'in', $uniquePartnerIds],
+                ['type', '=', 'contact']
+            ];
+            
+            $contacts = $this->execute('res.partner', 'search_read', [$contactDomain], [
+                'fields' => ['name', 'email', 'title', 'parent_id'],
+            ]);
+
+            // Map contacts by parent partner ID
+            $partnerContacts = [];
+            foreach ($contacts as $contact) {
+                if (!empty($contact['parent_id']) && is_array($contact['parent_id'])) {
+                    $parentId = $contact['parent_id'][0];
+                    if (!isset($partnerContacts[$parentId])) {
+                        $title = '';
+                        if (!empty($contact['title']) && is_array($contact['title'])) {
+                            $title = $contact['title'][1] . ' ';
+                        }
+                        
+                        $contactName = is_string($contact['name']) ? $contact['name'] : '';
+                        $contactEmail = is_string($contact['email']) ? $contact['email'] : '';
+                        
+                        $partnerContacts[$parentId] = [
+                            'pic_name' => trim($title . $contactName),
+                            'pic_email' => $contactEmail,
+                        ];
+                    }
+                }
+            }
+
+            // 3. Map back to Rental IDs
+            $result = [];
+            foreach ($orderToPartnerMap as $orderName => $data) {
+                $partnerId = $data['partner_id'];
+                $picData = $partnerContacts[$partnerId] ?? ($mainPartnerDetails[$partnerId] ?? ['pic_name' => '-', 'pic_email' => '-']);
+                
+                $result[$orderName] = [
+                    'pic_name' => $picData['pic_name'],
+                    'pic_email' => $picData['pic_email'],
+                    'rental_period_start' => $data['rental_start_date'] ? \Carbon\Carbon::parse($data['rental_start_date'])->addHours(7)->format('Y-m-d H:i:s') : null,
+                    'rental_period_end' => $data['rental_return_date'] ? \Carbon\Carbon::parse($data['rental_return_date'])->addHours(7)->format('Y-m-d H:i:s') : null,
+                    'is_company' => $mainPartnerDetails[$partnerId]['is_company'] ?? false,
+                ];
+            }
+
+            return $result;
+
+        } catch (\Exception $e) {
+            \Log::warning('Failed to fetch bulk CRM data: ' . $e->getMessage());
+            return [];
+        }
+    }
 }

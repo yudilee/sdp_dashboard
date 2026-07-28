@@ -101,6 +101,7 @@ class ImportController extends Controller
             // --- Enrichment ---
             $this->enrichWithRepairData($odoo);
             $this->enrichWithVendorUnits($odoo);
+            $this->enrichWithCrmData($odoo);
             
             return response()->json([
                 'success' => true,
@@ -198,6 +199,34 @@ class ImportController extends Controller
             if ($lotNumber) {
                 \App\Models\Item::where('lot_number', $lotNumber)->update(['vendor_unit' => $vendorName]);
             }
+        }
+    }
+
+    /**
+     * Enrich items with CRM PIC Data
+     */
+    public function enrichWithCrmData(OdooService $odoo): void
+    {
+        $rentalIds = \App\Models\Item::whereNotNull('rental_id')
+            ->pluck('rental_id')
+            ->unique()
+            ->filter()
+            ->toArray();
+
+        if (empty($rentalIds)) {
+            return;
+        }
+
+        $crmData = $odoo->fetchBulkCrmData(array_values($rentalIds));
+
+        foreach ($crmData as $rentalId => $data) {
+            \App\Models\Item::where('rental_id', $rentalId)->update([
+                'pic_name' => !empty($data['pic_name']) ? $data['pic_name'] : '-',
+                'pic_email' => !empty($data['pic_email']) ? $data['pic_email'] : '-',
+                'rental_period_start' => $data['rental_period_start'] ?? null,
+                'rental_period_end' => $data['rental_period_end'] ?? null,
+                'is_company' => $data['is_company'] ?? false,
+            ]);
         }
     }
 

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\CrmController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -35,6 +36,12 @@ Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
 Route::post('/settings/targets', [SettingsController::class, 'updateTargets'])->name('settings.targets');
 Route::post('/settings/odoo', [SettingsController::class, 'updateOdoo'])->name('settings.odoo');
 Route::get('/api/settings/targets', [SettingsController::class, 'getTargets'])->name('api.settings.targets');
+
+// CRM Routes
+Route::get('/crm', [CrmController::class, 'index'])->name('crm.index');
+Route::post('/crm/auth', [CrmController::class, 'authenticate'])->name('crm.auth');
+Route::get('/settings/crm', [CrmController::class, 'settings'])->name('crm.settings');
+Route::post('/settings/crm', [CrmController::class, 'updatePassword'])->name('crm.settings.update');
 
 // Suggestions API
 Route::get('/api/suggestions', [DashboardController::class, 'suggestions'])->name('api.suggestions');
