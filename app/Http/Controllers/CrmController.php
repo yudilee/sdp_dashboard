@@ -50,7 +50,7 @@ class CrmController extends Controller
     public function authenticate(Request $request)
     {
         $password = $request->input('password');
-        $storedPassword = Setting::get('crm_password', 'CRM@786');
+        $storedPassword = Setting::get('crm_password', env('CRM_DEFAULT_PASSWORD', 'admin'));
 
         if ($password === $storedPassword) {
             session(['crm_authenticated' => true]);
@@ -65,7 +65,7 @@ class CrmController extends Controller
      */
     public function settings()
     {
-        $currentPassword = Setting::get('crm_password', 'CRM@786');
+        $currentPassword = Setting::get('crm_password', env('CRM_DEFAULT_PASSWORD', 'admin'));
         return view('crm.settings', compact('currentPassword'));
     }
 
