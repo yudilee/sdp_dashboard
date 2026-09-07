@@ -63,11 +63,26 @@ class AutoGenerateSuratKuasa extends Command
             if ($discRes['success'] ?? false) {
                 foreach ($discRes['data'] ?? [] as $rec) {
                     if (empty($rec['lot_number'])) continue;
-                    $existing = Item::where('lot_number', $rec['lot_number'])->first();
+
+                    // Match by odoo_lot_id first (survives lot renames), then lot_number fallback.
+                    // This prevents duplicate rows when Odoo renames a staging lot to its real plate.
+                    $existing = null;
+                    if (!empty($rec['odoo_lot_id'])) {
+                        $existing = Item::where('odoo_lot_id', $rec['odoo_lot_id'])->first();
+                    }
+                    if (!$existing) {
+                        $existing = Item::where('lot_number', $rec['lot_number'])->first();
+                    }
+
                     if ($existing) {
                         $existing->surat_kuasa_tracked = true;
                         if (!empty($rec['odoo_lot_id'])) $existing->odoo_lot_id = $rec['odoo_lot_id'];
                         if (!empty($rec['vehicle_category'])) $existing->vehicle_category = $rec['vehicle_category'];
+                        // Tier 2: populate numbers immediately if Odoo has them and local DB is empty
+                        if (empty($existing->internal_reference) && !empty($rec['internal_reference']))
+                            $existing->internal_reference = $rec['internal_reference'];
+                        if (empty($existing->engine_number) && !empty($rec['engine_number']))
+                            $existing->engine_number = $rec['engine_number'];
                         $existing->save();
                     } else {
                         Item::create([
@@ -79,8 +94,8 @@ class AutoGenerateSuratKuasa extends Command
                             'location'            => $rec['location'] ?? '',
                             'bbn'                 => $rec['bbn'] ?? null,
                             'current_customer'    => $rec['current_customer'] ?? null,
-                            'internal_reference'  => null,
-                            'engine_number'       => null,
+                            'internal_reference'  => $rec['internal_reference'] ?? null,
+                            'engine_number'       => $rec['engine_number'] ?? null,
                             'on_hand_quantity'    => 0,
                             'is_on_hand'          => true,
                             'is_order_only'       => false,

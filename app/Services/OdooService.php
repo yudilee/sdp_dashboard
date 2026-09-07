@@ -2021,22 +2021,13 @@ class OdooService
 
     /**
      * Dedicated Odoo fetch specifically for Surat Kuasa units:
-     * Domain: product_qty = 0 AND ref (No.Rangka) is NOT set AND engine_number (No.Mesin) is NOT set AND vendor_rent is NOT set.
-     * Matches exactly the Odoo filter: On Hand Qty=0, Internal Reference not set, No.Mesin not set, Is Vendor Rent not set.
-     * Uses search_read to return the Odoo lot integer ID for stable rename-tracking.
+     * Two-Tier Discovery:
+     * Tier 1: Strict criteria (product_qty = 0, ref = false, engine_number = false, is_vendor_rent != true)
+     * Tier 2: Recent 30-day updates (updated_at > 30 days ago) to capture potentially stale stock.
      */
     public function fetchSuratKuasaUnits(): array
     {
         try {
-            // This domain exactly mirrors the Odoo manual filter:
-            // On Hand Quantity = 0 | Internal Reference is not set | No.Mesin is not set | Is Vendor Rent is not set
-            $domain = [
-                ['product_qty', '=', 0],
-                ['ref', '=', false],
-                ['engine_number', '=', false],
-                ['is_vendor_rent', '!=', true],
-            ];
-
             $readFields = [
                 'id',
                 'name',
@@ -2050,15 +2041,35 @@ class OdooService
                 'bbn_id',
             ];
 
-            $rows = $this->execute('stock.lot', 'search_read', [$domain], ['fields' => $readFields]);
+            // Tier 1: Strict logic
+            $domain1 = [
+                ['product_qty', '=', 0],
+                ['ref', '=', false],
+                ['engine_number', '=', false],
+                ['is_vendor_rent', '!=', true],
+            ];
+            $rows1 = $this->execute('stock.lot', 'search_read', [$domain1], ['fields' => $readFields]);
 
-            if (!is_array($rows)) {
-                return ['success' => false, 'message' => 'Unexpected response from Odoo search_read', 'data' => []];
+            // Tier 2: Recency fallback — catches units where staff filled No. Rangka / No. Mesin
+            // early in Odoo (before they appear in the Tier 1 strict query).
+            // Safety boundary: only lots CREATED in Odoo within the last 30 days.
+            // create_date is immutable (set once) — old fleet vehicles (2021-2025) are never picked up.
+            $cutoffDate = now()->subDays(30)->toDateTimeString();
+            $domain2 = [
+                ['product_qty', '=', 0],
+                ['is_vendor_rent', '!=', true],
+                ['create_date', '>=', $cutoffDate],
+            ];
+            $rows2 = $this->execute('stock.lot', 'search_read', [$domain2], ['fields' => $readFields]);
+
+            $combinedRows = [];
+            foreach (array_merge(is_array($rows1) ? $rows1 : [], is_array($rows2) ? $rows2 : []) as $row) {
+                $combinedRows[$row['id']] = $row;
             }
 
             // Batch fetch vehicle_category_id from product.product
             $productIds = [];
-            foreach ($rows as $row) {
+            foreach ($combinedRows as $row) {
                 if (!empty($row['product_id']) && is_array($row['product_id'])) {
                     $productIds[] = $row['product_id'][0];
                 }
@@ -2077,19 +2088,18 @@ class OdooService
                         }
                     }
                 } catch (\Exception $e) {
-                    \Log::warning('Could not batch read vehicle_category_id from product.product: ' . $e->getMessage());
+                    \Log::warning('Could not batch read vehicle_category_id: ' . $e->getMessage());
                 }
             }
 
             $records = [];
-            foreach ($rows as $row) {
+            foreach ($combinedRows as $row) {
                 $lotNumber = $row['name'] ?? '';
                 if (empty($lotNumber)) continue;
 
                 $odooLotId = $row['id'] ?? null;
                 $isVendorRent = !empty($row['is_vendor_rent']) && $row['is_vendor_rent'] !== false;
 
-                // product_id, location_id, bbn_id come as [id, display_name] tuples
                 $productId = is_array($row['product_id']) ? ($row['product_id'][0] ?? null) : null;
                 $product = is_array($row['product_id']) ? ($row['product_id'][1] ?? '') : ($row['product_id'] ?? '');
                 $location = is_array($row['location_id']) ? ($row['location_id'][1] ?? '') : ($row['location_id'] ?? '');
