@@ -325,8 +325,9 @@ class SuratKuasaController extends Controller
                     $wasTracked = $existing->surat_kuasa_tracked;
 
                     // Persistence: keep tracking if already tracked.
-                    // Start tracking only if BOTH ref AND engine are empty (initial discovery rule 1).
-                    if ($wasTracked || $bothEmpty) {
+                    // Tier 1 returns units with both fields empty; Tier 2 returns recently created
+                    // lots (create_date <= 30 days) regardless of fill state. Both are valid to track.
+                    if ($wasTracked || $bothEmpty || !empty($itemData['odoo_lot_id'])) {
                         $existing->surat_kuasa_tracked = true;
                     }
 
@@ -352,54 +353,68 @@ class SuratKuasaController extends Controller
                     if (!empty($itemData['current_customer']) && $existing->current_customer !== $itemData['current_customer'])
                         $existing->current_customer = $itemData['current_customer'];
 
+                    // Tier 2: If Odoo has ref/engine data and local DB is still empty, populate them now.
+                    // This ensures early-filled units don't stay blank until Fast Sync runs.
+                    if (empty($existing->internal_reference) && !empty($itemData['internal_reference']))
+                        $existing->internal_reference = $itemData['internal_reference'];
+                    if (empty($existing->engine_number) && !empty($itemData['engine_number']))
+                        $existing->engine_number = $itemData['engine_number'];
+
                     if ($existing->isDirty()) {
                         $existing->save();
                         if ($existing->surat_kuasa_tracked && !$wasTracked) {
                             $syncedCount++;
+                            $isReady = !empty($existing->internal_reference) && !empty($existing->engine_number);
                             $changedDetails[] = [
-                                'lot_number' => $existing->lot_number,
-                                'product' => $existing->product,
-                                'internal_reference' => null,
-                                'engine_number' => null,
-                                'changes' => ['Tracking confirmed (awaiting No. Rangka & Mesin)'],
-                                'is_ready' => false,
-                                'status_label' => 'Awaiting Data',
-                                'is_new' => false,
+                                'lot_number'         => $existing->lot_number,
+                                'product'            => $existing->product,
+                                'internal_reference' => $existing->internal_reference,
+                                'engine_number'      => $existing->engine_number,
+                                'changes'            => [$isReady
+                                    ? 'Tracking confirmed — data complete (Ready to Generate!)'
+                                    : 'Tracking confirmed (awaiting No. Rangka & Mesin)'],
+                                'is_ready'           => $isReady,
+                                'status_label'       => $isReady ? 'Ready to Generate' : 'Awaiting Data',
+                                'is_new'             => false,
                             ];
                         }
                     }
                 } else {
-                    // Brand new lot not in DB. Only track if BOTH are empty (rule 1).
-                    if ($bothEmpty) {
-                        $newItem = Item::create([
-                            'odoo_lot_id' => $odooLotId,
-                            'lot_number' => $itemData['lot_number'],
-                            'product' => $itemData['product'] ?? '',
-                            'vehicle_category' => $itemData['vehicle_category'] ?? null,
-                            'year' => $itemData['year'] ?? date('Y'),
-                            'location' => $itemData['location'] ?? '',
-                            'bbn' => $itemData['bbn'] ?? null,
-                            'current_customer' => $itemData['current_customer'] ?? null,
-                            'internal_reference' => null,
-                            'engine_number' => null,
-                            'on_hand_quantity' => 0,
-                            'is_on_hand' => true,
-                            'is_order_only' => false,
-                            'is_vendor_rent' => false,
-                            'surat_kuasa_tracked' => true,
-                        ]);
-                        $syncedCount++;
-                        $changedDetails[] = [
-                            'lot_number' => $newItem->lot_number,
-                            'product' => $newItem->product,
-                            'internal_reference' => null,
-                            'engine_number' => null,
-                            'changes' => ['New staging unit tracked (awaiting No. Rangka & Mesin)'],
-                            'is_ready' => false,
-                            'status_label' => 'Awaiting Data',
-                            'is_new' => true,
-                        ];
-                    }
+                    // Brand new lot not in DB.
+                    // All records returned by fetchSuratKuasaUnits() are pre-qualified:
+                    // Tier 1 ensures ref+engine empty; Tier 2 ensures create_date <= 30 days.
+                    // Save actual numbers if already filled (Tier 2 early-entry scenario).
+                    $newItem = Item::create([
+                        'odoo_lot_id'        => $odooLotId,
+                        'lot_number'         => $itemData['lot_number'],
+                        'product'            => $itemData['product'] ?? '',
+                        'vehicle_category'   => $itemData['vehicle_category'] ?? null,
+                        'year'               => $itemData['year'] ?? date('Y'),
+                        'location'           => $itemData['location'] ?? '',
+                        'bbn'                => $itemData['bbn'] ?? null,
+                        'current_customer'   => $itemData['current_customer'] ?? null,
+                        'internal_reference' => $itemData['internal_reference'] ?? null,
+                        'engine_number'      => $itemData['engine_number'] ?? null,
+                        'on_hand_quantity'   => 0,
+                        'is_on_hand'         => true,
+                        'is_order_only'      => false,
+                        'is_vendor_rent'     => false,
+                        'surat_kuasa_tracked' => true,
+                    ]);
+                    $syncedCount++;
+                    $isReady = !empty($newItem->internal_reference) && !empty($newItem->engine_number);
+                    $changedDetails[] = [
+                        'lot_number'         => $newItem->lot_number,
+                        'product'            => $newItem->product,
+                        'internal_reference' => $newItem->internal_reference,
+                        'engine_number'      => $newItem->engine_number,
+                        'changes'            => [$isReady
+                            ? 'New unit tracked with data complete (Ready to Generate!)'
+                            : 'New staging unit tracked (awaiting No. Rangka & Mesin)'],
+                        'is_ready'           => $isReady,
+                        'status_label'       => $isReady ? 'Ready to Generate' : 'Awaiting Data',
+                        'is_new'             => true,
+                    ];
                 }
             }
 
